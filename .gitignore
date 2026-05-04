@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Env (never commit secrets)
+.env
+.env.*.local
+
+# Logs & caches
+npm-debug.log*
+.DS_Store
+coverage/
+.playwright/
+
+# Vite
+web/dist/

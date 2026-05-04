@@ -1,0 +1,2 @@
+# BMad helper scripts (e.g. resolve_customization.py) on Python < 3.11
+tomli>=2.0.1

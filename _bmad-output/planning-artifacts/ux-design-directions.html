@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>lets-do-it — UX design directions</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; }
+    body { margin: 0; background: #09090b; color: #fafafa; line-height: 1.5; }
+    header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #27272a; position: sticky; top: 0; background: #09090b; z-index: 2; }
+    h1 { font-size: 1.125rem; font-weight: 600; margin: 0 0 0.25rem; }
+    p.lead { margin: 0; font-size: 0.875rem; color: #a1a1aa; }
+    nav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+    nav a {
+      font-size: 0.75rem; text-decoration: none; color: #a1a1aa; padding: 0.35rem 0.65rem;
+      border-radius: 0.375rem; border: 1px solid #3f3f46;
+    }
+    nav a:hover { color: #fafafa; border-color: #71717a; }
+    main { padding: 1.5rem; max-width: 72rem; margin: 0 auto; }
+    section { margin-bottom: 3rem; scroll-margin-top: 5rem; }
+    section h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #71717a; margin: 0 0 0.75rem; }
+    .mock {
+      border-radius: 0.75rem; overflow: hidden; border: 1px solid;
+      max-width: 22rem; min-height: 14rem;
+    }
+    .mock header-bar { padding: 0.65rem 1rem; font-size: 0.8rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+    .mock .list { padding: 0.5rem 0; }
+    .row { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 1rem; font-size: 0.8rem; border-top: 1px solid transparent; }
+    .row:hover { filter: brightness(1.03); }
+    .cb { width: 1rem; height: 1rem; border-radius: 0.2rem; flex-shrink: 0; }
+    .composer { padding: 0.65rem 1rem; display: flex; gap: 0.5rem; align-items: center; border-top: 1px solid; }
+    .composer input { flex: 1; border-radius: 0.375rem; border: 1px solid; padding: 0.4rem 0.5rem; font-size: 0.8rem; }
+    .btn { border: none; border-radius: 0.375rem; padding: 0.4rem 0.75rem; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+    .empty { padding: 2rem 1rem; text-align: center; font-size: 0.8rem; opacity: 0.85; }
+
+    /* A — Classic calm (zinc + blue) */
+    #a .mock { border-color: #3f3f46; background: #18181b; }
+    #a .mock header-bar { background: #27272a; color: #fafafa; border-bottom: 1px solid #3f3f46; }
+    #a .row { border-color: #27272a; color: #e4e4e7; }
+    #a .row.done { opacity: 0.55; text-decoration: line-through; }
+    #a .cb { border: 2px solid #71717a; background: #27272a; }
+    #a .composer { background: #18181b; border-color: #27272a; }
+    #a .composer input { background: #09090b; border-color: #3f3f46; color: #fafafa; }
+    #a .btn { background: #2563eb; color: #fff; }
+    #a .btn:hover { background: #1d4ed8; }
+
+    /* B — Warm paper */
+    #b .mock { border-color: #d6d3d1; background: #fafaf9; }
+    #b .mock header-bar { background: #f5f5f4; color: #1c1917; border-bottom: 1px solid #e7e5e4; }
+    #b .row { border-color: #e7e5e4; color: #292524; }
+    #b .row.done { opacity: 0.5; text-decoration: line-through; color: #78716c; }
+    #b .cb { border: 2px solid #a8a29e; background: #fff; }
+    #b .composer { background: #fafaf9; border-color: #e7e5e4; }
+    #b .composer input { background: #fff; border-color: #d6d3d1; color: #1c1917; }
+    #b .btn { background: #c2410c; color: #fff; }
+    #b .btn:hover { background: #9a3412; }
+
+    /* C — High contrast / dense */
+    #c .mock { border-color: #000; background: #fff; }
+    #c .mock header-bar { background: #000; color: #fff; border-bottom: 2px solid #000; }
+    #c .row { border-color: #e5e5e5; color: #000; padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+    #c .row.done { opacity: 0.45; text-decoration: line-through; }
+    #c .cb { border: 2px solid #000; }
+    #c .composer { background: #f5f5f5; border-color: #000; border-top-width: 2px; }
+    #c .composer input { border: 2px solid #000; background: #fff; }
+    #c .btn { background: #000; color: #fff; border-radius: 0; }
+    #c .btn:hover { background: #262626; }
+
+    /* D — Soft minimal */
+    #d .mock { border-color: #e9d5ff; background: #faf5ff; border-radius: 1.25rem; }
+    #d .mock header-bar { background: #f3e8ff; color: #581c87; border-bottom: 1px solid #e9d5ff; border-radius: 1.25rem 1.25rem 0 0; }
+    #d .row { border-color: #ede9fe; color: #4c1d95; }
+    #d .row.done { opacity: 0.5; text-decoration: line-through; color: #7c3aed; }
+    #d .cb { border: 2px solid #a78bfa; border-radius: 0.35rem; background: #fff; }
+    #d .composer { background: #faf5ff; border-color: #e9d5ff; }
+    #d .composer input { border-radius: 0.75rem; border: 1px solid #ddd6fe; background: #fff; color: #4c1d95; }
+    #d .btn { background: #7c3aed; color: #fff; border-radius: 9999px; }
+    #d .btn:hover { background: #6d28d9; }
+
+    .grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); align-items: start; }
+    .tag { font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 0.25rem; background: rgba(255,255,255,0.08); }
+    #b .tag { background: rgba(0,0,0,0.06); color: #44403c; }
+    #c .tag { background: #000; color: #fff; }
+    #d .tag { background: #ede9fe; color: #5b21b6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>lets-do-it — design direction explorer</h1>
+    <p class="lead">Four static explorations (list + composer). Open in browser; use anchors to compare. Aligns with UX spec: calm, accessible, single-list.</p>
+    <nav>
+      <a href="#a">A — Classic calm</a>
+      <a href="#b">B — Warm paper</a>
+      <a href="#c">C — High contrast</a>
+      <a href="#d">D — Soft minimal</a>
+    </nav>
+  </header>
+  <main>
+    <section id="a">
+      <h2>Direction A — Classic calm <span class="tag">Recommended default</span></h2>
+      <div class="grid">
+        <div class="mock" aria-label="Direction A mockup">
+          <div class="header-bar">Todos <span style="font-weight:400;opacity:.7">3 active</span></div>
+          <div class="list">
+            <div class="row"><span class="cb" role="checkbox" aria-checked="false"></span> Ship v1 checklist</div>
+            <div class="row done"><span class="cb" role="checkbox" aria-checked="true"></span> Draft UX spec</div>
+            <div class="row"><span class="cb" role="checkbox" aria-checked="false"></span> Wire CI a11y</div>
+          </div>
+          <div class="composer"><input placeholder="Add a todo…" /><button class="btn" type="button">Add</button></div>
+        </div>
+        <p style="font-size:0.8rem;color:#a1a1aa;max-width:24rem">Zinc surfaces + blue accent. Best match to “quiet desk,” WCAG-friendly contrast, and Tailwind/Radix defaults.</p>
+      </div>
+    </section>
+    <section id="b">
+      <h2>Direction B — Warm paper</h2>
+      <div class="grid">
+        <div class="mock" aria-label="Direction B mockup">
+          <div class="header-bar">Todos <span class="tag">calm</span></div>
+          <div class="list">
+            <div class="row"><span class="cb"></span> Morning review</div>
+            <div class="row done"><span class="cb"></span> Email backlog</div>
+          </div>
+          <div class="composer"><input placeholder="What needs doing?" /><button class="btn" type="button">Add</button></div>
+        </div>
+        <p style="font-size:0.8rem;color:#78716c;max-width:24rem">Stone neutrals + terracotta accent. Slightly warmer personality; watch contrast on muted done text.</p>
+      </div>
+    </section>
+    <section id="c">
+      <h2>Direction C — High contrast / dense</h2>
+      <div class="grid">
+        <div class="mock" aria-label="Direction C mockup">
+          <div class="header-bar">Todos</div>
+          <div class="list">
+            <div class="row"><span class="cb"></span> API contract</div>
+            <div class="row done"><span class="cb"></span> README run</div>
+            <div class="row"><span class="cb"></span> axe CI</div>
+          </div>
+          <div class="composer"><input placeholder="Add…" /><button class="btn" type="button">Add</button></div>
+        </div>
+        <p style="font-size:0.8rem;color:#a1a1aa;max-width:24rem">Sharp black/white; tighter rows. Appeals to builder audience; may feel stark for “calm focus” primary persona.</p>
+      </div>
+    </section>
+    <section id="d">
+      <h2>Direction D — Soft minimal</h2>
+      <div class="grid">
+        <div class="mock" aria-label="Direction D mockup">
+          <div class="header-bar">Todos</div>
+          <div class="list">
+            <div class="row"><span class="cb"></span> Sketch flows</div>
+            <div class="row done"><span class="cb"></span> Pick tokens</div>
+          </div>
+          <div class="composer"><input placeholder="New todo" /><button class="btn" type="button">Add</button></div>
+        </div>
+        <p style="font-size:0.8rem;color:#a1a1aa;max-width:24rem">Violet-tinted neutrals, pill button, large radius. Friendly; ensure purple surfaces still meet contrast for small text.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
