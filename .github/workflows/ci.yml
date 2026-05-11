@@ -1,0 +1,63 @@
+# Gated checks (single source of truth with README **Test** and **Continuous integration**):
+# - README must contain ## Run, ## Test, ## API contract (scripts/check-readme-sections.mjs)
+# - ESLint in `web` workspace only (`api` has no lint script)
+# - Vitest: `api` (including DB integration when DATABASE_URL is set) + `web`
+# - Playwright e2e against Postgres service + `npm run dev:e2e`
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CI: "true"
+  DATABASE_URL: postgres://todo:todo@127.0.0.1:5432/todos
+  WEB_ORIGIN: http://127.0.0.1:5173
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: todo
+          POSTGRES_PASSWORD: todo
+          POSTGRES_DB: todos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U todo -d todos"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: US-1.5.a — README section headings
+        run: npm run check:readme
+
+      - name: Lint (web only)
+        run: npm run lint
+
+      - name: Unit + API integration tests
+        run: npm run test:api
+
+      - name: Web unit tests
+        run: npm run test:web
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: npm run test:e2e

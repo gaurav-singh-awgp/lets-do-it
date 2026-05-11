@@ -24,6 +24,13 @@ export async function buildApp(opts: BuildAppOptions = {}) {
   const app = Fastify({
     logger: true,
     genReqId: () => randomUUID(),
+    // Let Zod own unknown/extra body keys (e.g. PATCH `.strict()` rejects `text`).
+    // Fastify's default AJV `removeAdditional` strips keys before the route runs.
+    ajv: {
+      customOptions: {
+        removeAdditional: false,
+      },
+    },
   });
 
   const databaseUrl = resolveDatabaseUrl(opts.databaseUrl);

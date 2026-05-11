@@ -1,5 +1,9 @@
 # Deferred work
 
+## Deferred from: code review of 1-5-readme-run-test-api-contract-and-root-ci-skeleton.md (2026-05-12)
+
+- **`global-setup.mjs` `docker compose up -d` silently fails in CI** — When Playwright runs in GitHub Actions, port 5432 is already bound by the `services:` Postgres container, so `docker compose up -d` throws an error that is caught and swallowed. The tests still pass because `DATABASE_URL` points to the already-running service container. Risk: if the silent-error path is ever removed or the catch narrowed, CI will break. Fix: add `if (process.env.CI) return;` guard at the top of `globalSetup()` to skip the Compose call entirely in CI. Candidate owner: Story 3.4 (CI matrix) or a small housekeeping PR.
+
 ## Deferred from: code review of 1-4-web-list-shell-with-loading-empty-and-fetch-error-states.md (2026-05-12)
 
 - **PATCH immutable-text rule is not enforced.** Integration test `todos.integration.test.ts › PATCH rejects extra keys (immutable text)` returns **200** instead of the expected **400** when the client sends `{ done: true, text: "nope" }`. Fastify defaults AJV with `removeAdditional: true`, so the route schema's `additionalProperties: false` silently strips `text` before the handler runs; the Zod `.strict()` then sees only `{ done }` and passes. Pre-existing failure inherited from Story 1.3 — Story 3.1 (`PATCH /api/v1/todos/:id for done-only updates`) is the natural owner. Fix options: (a) configure Fastify AJV `removeAdditional: false`, (b) read `request.body` before Fastify validation via a pre-parse hook, or (c) move strict validation entirely into Zod and have the route opt out of Fastify body validation. Test was correct; implementation is the regression.

@@ -4,7 +4,7 @@ const defaultDatabaseUrl =
   "postgres://todo:todo@127.0.0.1:5432/todos";
 
 export default defineConfig({
-  globalSetup: "./tests/e2e/global-setup.ts",
+  globalSetup: "./tests/e2e/global-setup.mjs",
   testDir: "tests/e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

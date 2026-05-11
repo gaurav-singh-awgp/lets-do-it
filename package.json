@@ -3,6 +3,8 @@
   "private": true,
   "workspaces": ["api", "web"],
   "scripts": {
+    "check:readme": "node scripts/check-readme-sections.mjs",
+    "lint": "npm run lint -w web",
     "dev:api": "npm run dev -w api",
     "dev:web": "npm run dev -w web",
     "build": "npm run build --workspaces --if-present",
