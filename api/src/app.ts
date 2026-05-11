@@ -8,6 +8,7 @@ import type { Db } from "./db/client.js";
 import { createDb, createPool } from "./db/client.js";
 import { resolveDatabaseUrl } from "./db/resolve-database-url.js";
 import { runMigrations } from "./db/run-migrations.js";
+import { resolveWebOrigin } from "./http/resolve-web-origin.js";
 import { registerTodoRoutes } from "./routes/todos.js";
 import { TodoRepository } from "./repositories/todo.repository.js";
 import { TodoService } from "./services/todo.service.js";
@@ -32,7 +33,12 @@ export async function buildApp(opts: BuildAppOptions = {}) {
 
   const pool = createPool(databaseUrl);
   const db: Db = createDb(pool);
-  await runMigrations(db);
+  try {
+    await runMigrations(db);
+  } catch (err) {
+    await pool.end();
+    throw err;
+  }
 
   app.addHook("onClose", async () => {
     await pool.end();
@@ -55,8 +61,18 @@ export async function buildApp(opts: BuildAppOptions = {}) {
     });
   }
 
-  const webOrigin = process.env.WEB_ORIGIN ?? "http://127.0.0.1:5173";
-  await app.register(helmet);
+  const webOrigin = resolveWebOrigin(process.env.WEB_ORIGIN);
+  await app.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        // Swagger UI serves inline scripts/styles; defaults block them.
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        connectSrc: ["'self'"],
+        workerSrc: ["'self'", "blob:"],
+        imgSrc: ["'self'", "data:", "blob:", "https:"],
+      },
+    },
+  });
   await app.register(cors, {
     origin: webOrigin,
     credentials: true,

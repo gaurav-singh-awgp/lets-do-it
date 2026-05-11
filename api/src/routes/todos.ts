@@ -15,12 +15,12 @@ const todoIdParamSchema = z.string().uuid();
 const createTodoBodyOpenApi = {
   type: "object",
   required: ["text"],
+  additionalProperties: false,
   properties: {
     text: {
       type: "string",
       minLength: 1,
-      maxLength: MAX_TODO_TEXT_CODE_POINTS,
-      description: "Non-empty todo text (Unicode code-point limit enforced at runtime)",
+      description: `Non-empty text; max ${MAX_TODO_TEXT_CODE_POINTS} Unicode code points enforced at runtime by Zod (OpenAPI omits maxLength so documented contract matches code-point semantics, not UTF-16 units).`,
     },
   },
 } as const;

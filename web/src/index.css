@@ -1,3 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: oklch(0.99 0 0);
+  --color-surface: oklch(0.97 0 0);
+  --color-border: oklch(0.91 0 0);
+  --color-text: oklch(0.21 0.01 280);
+  --color-text-muted: oklch(0.5 0.02 280);
+  --color-accent: oklch(0.55 0.2 255);
+  --color-accent-fg: oklch(0.99 0 0);
+  --color-destructive: oklch(0.55 0.22 25);
+  --color-error-bg: oklch(0.96 0.04 25);
+  --color-error-fg: oklch(0.3 0.18 25);
+  --radius-md: 0.5rem;
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -169,12 +185,6 @@ p {
 .todo-form button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-}
-
-.todo-muted,
-.todo-empty {
-  margin: 0.5rem 0 0;
-  color: var(--text);
 }
 
 .todo-list {

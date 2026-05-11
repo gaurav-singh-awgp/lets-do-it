@@ -25,6 +25,8 @@ npm run db:migrate -w api      # apply Drizzle migrations (required before first
 
 `DATABASE_URL` must match Compose (see `api/.env.example`).
 
+**Schema / migrations:** `npm run db:migrate -w api` and API startup both invoke the same Drizzle migrator against `api/src/db/migrations` (idempotent via the migration table). Use the CLI when you want the schema applied **without** starting the server (CI, provisioning). Starting `dev:api` still runs migrations so local stacks self-heal if you skip the CLI after the database exists.
+
 **3. Dev servers**
 
 ```bash
@@ -32,7 +34,9 @@ npm run dev:api   # Fastify API — default http://localhost:3000
 npm run dev:web   # Vite client — default http://127.0.0.1:5173
 ```
 
-Run **api** and **web** in **separate terminals**. The API runs `drizzle-orm` migrations on startup as well; `npm run db:migrate -w api` is the explicit step for CI or when you want schema applied without booting the server.
+Run **api** and **web** in **separate terminals**.
+
+**CORS:** set **`WEB_ORIGIN`** in `api/.env` to the **single** origin the browser uses for the Vite app (default when unset: `http://127.0.0.1:5173`). The API does not accept a comma-separated list; use one URL only.
 
 **Drizzle (from `api/`)**
 

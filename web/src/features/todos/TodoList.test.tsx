@@ -24,6 +24,8 @@ describe("TodoList", () => {
         onDelete={vi.fn()}
       />,
     );
-    expect(screen.getByText(/loading/i)).toBeVisible();
+    expect(
+      screen.getByRole("status", { name: /loading todos/i }),
+    ).toBeVisible();
   });
 });
