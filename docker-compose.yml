@@ -1,3 +1,12 @@
+# Postgres-only (default): `docker compose up -d postgres` (or `docker-compose up -d postgres`).
+# Full stack (api + web + postgres), profile `full`:
+#   docker compose --profile full up -d --build
+# If `docker compose` is not installed (Docker CLI plugin), use standalone Compose v2+:
+#   docker-compose --profile full up -d --build
+#   # or: COMPOSE_PROFILES=full docker-compose up -d --build
+# Published URLs (full profile): web http://127.0.0.1:9080/ , API http://127.0.0.1:3000/ , Postgres 5432.
+# Browser → API on host:3000; SPA build uses VITE_API_BASE_URL=http://127.0.0.1:3000 (see README).
+
 services:
   postgres:
     image: postgres:17-alpine
@@ -9,6 +18,50 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todo -d todos"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://todo:todo@postgres:5432/todos
+      WEB_ORIGIN: http://127.0.0.1:9080
+      HOST: 0.0.0.0
+      PORT: "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:3000/health | grep -q '\"ok\":true' || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  web:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://127.0.0.1:3000
+    ports:
+      - "9080:8080"
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   pgdata:

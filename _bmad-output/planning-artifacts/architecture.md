@@ -571,6 +571,19 @@ If you **omit** a root workspace, README **Test** must still document the three 
 | **Health** | **`HEALTHCHECK`** uses **`wget --spider`** against **`http://127.0.0.1:8080/`** (HTTP **200**). |
 | **API from browser** | **`VITE_API_BASE_URL`** is a **build-time** value (see `web/src/api/todosClient.ts`). For Docker Compose in Story 4.3, pick a hostname:port the **host browser** can resolve (often **`http://127.0.0.1:<published-api-port>`**), and align **`WEB_ORIGIN`** on the API with the **web** URL (e.g. **`http://127.0.0.1:<published-web-port>`**). |
 
+### Root Compose (Story 4.3)
+
+| Topic | Decision |
+|-------|-----------|
+| **File** | Repo root **`docker-compose.yml`**. |
+| **Postgres** | Service **`postgres`** — **no** profile (default `docker compose up -d postgres` unchanged). **`5432:5432`**, **`pg_isready`** healthcheck. |
+| **Profile `full`** | Services **`api`** and **`web`** list **`profiles: ["full"]`** so they start only with **`--profile full`** or **`COMPOSE_PROFILES=full`**. |
+| **Ports (host)** | **`api`** `3000:3000`; **`web`** `9080:8080` (nginx listens on **8080** in-container). |
+| **API env** | **`DATABASE_URL`** `postgres://todo:todo@postgres:5432/todos`; **`WEB_ORIGIN`** `http://127.0.0.1:9080` (must match browser origin for the SPA). |
+| **Web build arg** | **`VITE_API_BASE_URL=http://127.0.0.1:3000`** so the browser calls the published API port on localhost. |
+| **Ordering** | **`web`** **`depends_on`** **`api`** **`condition: service_healthy`**; **`api`** depends on **`postgres`** healthy. **`api`** Compose **healthcheck** probes **`GET /health`**. |
+| **CLIs** | Prefer **`docker compose`** (plugin). Document **`docker-compose`** standalone and **`COMPOSE_PROFILES=full`** for environments without the plugin (see file header comments). |
+
 **TLS:** Termination at ingress/reverse proxy is acceptable; document that **NFR-04** applies to any internet-facing deployment.
 
 ## Architecture Validation Results
