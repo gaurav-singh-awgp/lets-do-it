@@ -35,7 +35,11 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-03T00:00:00Z"
-last_updated: "2026-05-13T14:05:00Z"
+last_updated: "2026-05-12T20:46:00Z"
+# Story 3.1 code review complete (bmad-code-review) on 2026-05-12 — status done
+# Story 3.1 ready for code review (bmad-dev-story) on 2026-05-12 — status review
+# Story 3.1 in progress (bmad-dev-story) on 2026-05-12
+# Story 3.1 contexted by bmad-create-story on 2026-05-12 — status ready-for-dev
 # Story 2.4 code review complete (bmad-code-review) on 2026-05-12 — status done
 # Story 2.4 implementation complete (bmad-dev-story) on 2026-05-12 — status review
 # Story 2.4 in progress (bmad-dev-story) on 2026-05-12
@@ -79,8 +83,8 @@ development_status:
   2-4-todorow-delete-control-with-accessible-labeling: done
   epic-2-retrospective: optional
 
-  epic-3: backlog
-  3-1-patch-api-v1-todos-by-id-for-done-only-updates: backlog
+  epic-3: in-progress
+  3-1-patch-api-v1-todos-by-id-for-done-only-updates: done
   3-2-accessible-done-toggle-with-completed-styling: backlog
   3-3-end-to-end-smoke-for-sc-01-core-loop: backlog
   3-4-ci-matrix-unit-e2e-and-axe-gate-on-list-view: backlog

@@ -35,3 +35,10 @@
 ## Deferred from: code review of 1-6-baseline-accessibility-checks-for-list-shell.md (2026-05-12)
 
 - Unit and E2E accessibility checks currently resolve different `axe-core` versions via `jest-axe` and `@axe-core/playwright`. This can produce inconsistent violation outcomes across layers. Defer as pre-existing tooling drift unless the team wants to pin/align both stacks now.
+
+## Deferred from: code review of 3-1-patch-api-v1-todos-by-id-for-done-only-updates.md (2026-05-12)
+
+- D1: `patchTodoBodySchema`, route handler, service, and repository are absent from this diff (story is brownfield — API was pre-existing). Manually verify these files comply with architecture constraints (`done`-only Zod strict, service gatekeeper, repository updates only `done + updated_at`).
+- D2: IS-/US- test taxonomy convention is undocumented and inconsistently applied across the test suite. Define in a CONTRIBUTING or testing guide in a future housekeeping pass.
+- D3: TOCTOU race — concurrent DELETE + PATCH on the same todo ID exercises an unguarded path in `patchTodo` (findById succeeds then updateDone on a deleted row). Pre-existing architecture gap; address when concurrency SLAs are defined.
+- D4: README does not document the `500` response for PATCH (consistent with DELETE, which also omits it). Pre-existing documentation pattern; align in a future API contract docs pass.

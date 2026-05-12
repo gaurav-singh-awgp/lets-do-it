@@ -140,7 +140,7 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
     expect(Number(cnt.rows[0]!.n)).toBe(0);
   });
 
-  it("PATCH /api/v1/todos/:id toggles done", async () => {
+  it("IS-3.1.a: PATCH done:true — JSON and DB show done=true", async () => {
     const created = await app.inject({
       method: "POST",
       url: "/api/v1/todos",
@@ -156,10 +156,79 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
       payload: { done: true },
     });
     expect(res.statusCode).toBe(200);
-    expect((res.json() as { done: boolean }).done).toBe(true);
+    const patchBody = res.json() as {
+      id: string;
+      text: string;
+      done: boolean;
+      createdAt: string;
+    };
+    expect(Object.keys(patchBody)).toEqual(["id", "text", "done", "createdAt"]);
+    expect(patchBody.id).toBe(id);
+    expect(patchBody.text).toBe("Walk");
+    expect(patchBody.done).toBe(true);
+    expect(patchBody.createdAt).toBeTruthy();
+
+    const row = await cleanPool.query<{ done: boolean }>(
+      "SELECT done FROM todos WHERE id = $1",
+      [id],
+    );
+    expect(row.rows).toHaveLength(1);
+    expect(row.rows[0]!.done).toBe(true);
   });
 
-  it("PATCH /api/v1/todos/:id returns 404 for unknown id", async () => {
+  it("IS-3.1.b: PATCH done:false after true — persisted done=false", async () => {
+    const created = await app.inject({
+      method: "POST",
+      url: "/api/v1/todos",
+      headers: { "content-type": "application/json" },
+      payload: { text: "Toggle back" },
+    });
+    const id = (created.json() as { id: string }).id;
+
+    const first = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${id}`,
+      headers: { "content-type": "application/json" },
+      payload: { done: true },
+    });
+    expect(first.statusCode).toBe(200);
+    expect((first.json() as { done: boolean }).done).toBe(true);
+
+    const interim = await cleanPool.query<{ done: boolean }>(
+      "SELECT done FROM todos WHERE id = $1",
+      [id],
+    );
+    expect(interim.rows).toHaveLength(1);
+    expect(interim.rows[0]!.done).toBe(true);
+
+    const second = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${id}`,
+      headers: { "content-type": "application/json" },
+      payload: { done: false },
+    });
+    expect(second.statusCode).toBe(200);
+    const secondBody = second.json() as {
+      id: string;
+      text: string;
+      done: boolean;
+      createdAt: string;
+    };
+    expect(Object.keys(secondBody)).toEqual(["id", "text", "done", "createdAt"]);
+    expect(secondBody.id).toBe(id);
+    expect(secondBody.text).toBe("Toggle back");
+    expect(secondBody.done).toBe(false);
+    expect(secondBody.createdAt).toBeTruthy();
+
+    const row = await cleanPool.query<{ done: boolean }>(
+      "SELECT done FROM todos WHERE id = $1",
+      [id],
+    );
+    expect(row.rows).toHaveLength(1);
+    expect(row.rows[0]!.done).toBe(false);
+  });
+
+  it("IS-3.1.c: PATCH unknown id — 404 NOT_FOUND", async () => {
     const res = await app.inject({
       method: "PATCH",
       url: "/api/v1/todos/00000000-0000-4000-8000-000000000001",
@@ -172,7 +241,7 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
     );
   });
 
-  it("PATCH rejects extra keys (immutable text)", async () => {
+  it("PATCH rejects { done, text } — 400 VALIDATION (immutable text)", async () => {
     const created = await app.inject({
       method: "POST",
       url: "/api/v1/todos",
@@ -187,6 +256,46 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
       payload: { done: true, text: "nope" },
     });
     expect(res.statusCode).toBe(400);
+  });
+
+  it("IS-3.1.e: PATCH with empty body {} — 400 VALIDATION (done is required)", async () => {
+    const created = await app.inject({
+      method: "POST",
+      url: "/api/v1/todos",
+      headers: { "content-type": "application/json" },
+      payload: { text: "Body test" },
+    });
+    const id = (created.json() as { id: string }).id;
+    const res = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${id}`,
+      headers: { "content-type": "application/json" },
+      payload: {},
+    });
+    expect(res.statusCode).toBe(400);
+    expect((res.json() as { error: { code: string } }).error.code).toBe(
+      "VALIDATION",
+    );
+  });
+
+  it("IS-3.1.f: PATCH with done: 1 (non-boolean) — 400 VALIDATION", async () => {
+    const created = await app.inject({
+      method: "POST",
+      url: "/api/v1/todos",
+      headers: { "content-type": "application/json" },
+      payload: { text: "Type test" },
+    });
+    const id = (created.json() as { id: string }).id;
+    const res = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/todos/${id}`,
+      headers: { "content-type": "application/json" },
+      payload: { done: 1 },
+    });
+    expect(res.statusCode).toBe(400);
+    expect((res.json() as { error: { code: string } }).error.code).toBe(
+      "VALIDATION",
+    );
   });
 
   it("IS-2.3.a: DELETE existing todo → 204 then GET shows row absent", async () => {
@@ -222,7 +331,7 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
     expect(body.error.requestId).toBeTruthy();
   });
 
-  it("PATCH returns 400 for invalid uuid", async () => {
+  it("IS-3.1.d: PATCH invalid UUID — 400 VALIDATION", async () => {
     const res = await app.inject({
       method: "PATCH",
       url: "/api/v1/todos/not-a-uuid",
@@ -266,7 +375,7 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
     expect(Object.keys(body[0]!)).toEqual(["id", "text", "done", "createdAt"]);
   });
 
-  it("OpenAPI JSON lists GET /api/v1/todos and DELETE /api/v1/todos/{id} with correct responses", async () => {
+  it("OpenAPI JSON lists GET/POST /api/v1/todos, PATCH/DELETE /api/v1/todos/{id}", async () => {
     const swApp = await buildApp({
       databaseUrl: databaseUrl!,
       enableSwagger: true,
@@ -283,6 +392,20 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
           {
             get?: unknown;
             post?: unknown;
+            patch?: {
+              parameters?: Array<{ name: string; schema?: { format?: string } }>;
+              requestBody?: {
+                content?: {
+                  "application/json"?: {
+                    schema?: {
+                      properties?: Record<string, unknown>;
+                      required?: string[];
+                    };
+                  };
+                };
+              };
+              responses?: Record<string, unknown>;
+            };
             delete?: {
               parameters?: Array<{ name: string; schema?: { format?: string } }>;
               responses?: Record<string, unknown>;
@@ -292,6 +415,20 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
       };
       expect(spec.paths?.["/api/v1/todos"]?.get).toBeDefined();
       expect(spec.paths?.["/api/v1/todos"]?.post).toBeDefined();
+
+      const patchPath = spec.paths?.["/api/v1/todos/{id}"]?.patch;
+      expect(patchPath).toBeDefined();
+      expect(patchPath?.responses?.["200"]).toBeDefined();
+      expect(patchPath?.responses?.["400"]).toBeDefined();
+      expect(patchPath?.responses?.["404"]).toBeDefined();
+      expect(patchPath?.responses?.["500"]).toBeDefined();
+      const patchBodySchema =
+        patchPath?.requestBody?.content?.["application/json"]?.schema;
+      expect(patchBodySchema?.properties?.done).toBeDefined();
+
+      const patchIdParam = patchPath?.parameters?.find((p) => p.name === "id");
+      expect(patchIdParam).toBeDefined();
+      expect(patchIdParam?.schema?.format).toBe("uuid");
 
       const deletePath = spec.paths?.["/api/v1/todos/{id}"]?.delete;
       expect(deletePath).toBeDefined();

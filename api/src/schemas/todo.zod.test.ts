@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
 import { MAX_TODO_TEXT_CODE_POINTS } from "../lib/constants.js";
-import { createTodoBodySchema } from "./todo.zod.js";
+import { createTodoBodySchema, patchTodoBodySchema } from "./todo.zod.js";
 
 describe("createTodoBodySchema (US-2.1.a)", () => {
   it("rejects empty text with flatten details suitable for error envelope", () => {
@@ -44,5 +44,43 @@ describe("createTodoBodySchema (US-2.1.b)", () => {
     } catch (e) {
       expect(e).toBeInstanceOf(ZodError);
     }
+  });
+});
+
+describe("US-3.1.a: patchTodoBodySchema", () => {
+  it("accepts { done: true }", () => {
+    expect(patchTodoBodySchema.parse({ done: true })).toEqual({ done: true });
+  });
+
+  it("accepts { done: false }", () => {
+    expect(patchTodoBodySchema.parse({ done: false })).toEqual({ done: false });
+  });
+
+  it("rejects { text, done } (immutable text)", () => {
+    expect(() =>
+      patchTodoBodySchema.parse({ done: true, text: "x" }),
+    ).toThrow(ZodError);
+  });
+
+  it("rejects unknown keys (strict)", () => {
+    expect(() =>
+      patchTodoBodySchema.parse({ done: true, extra: 1 }),
+    ).toThrow(ZodError);
+  });
+
+  it("rejects {} — done is required", () => {
+    expect(() => patchTodoBodySchema.parse({})).toThrow(ZodError);
+  });
+
+  it("rejects { done: 1 } — done must be boolean, not a number", () => {
+    expect(() =>
+      patchTodoBodySchema.parse({ done: 1 }),
+    ).toThrow(ZodError);
+  });
+
+  it("rejects { done: null } — done must be boolean, not null", () => {
+    expect(() =>
+      patchTodoBodySchema.parse({ done: null }),
+    ).toThrow(ZodError);
   });
 });
