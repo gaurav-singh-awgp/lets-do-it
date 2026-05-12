@@ -11,7 +11,7 @@ How you open the app depends on how it was started:
 | How it runs | Typical URL | Notes |
 |-------------|-------------|--------|
 | **Local dev** (Vite + API on your machine) | **`http://127.0.0.1:5173`** | Start Postgres, API, and web per the root [**README**](../README.md) **Run** section. |
-| **Docker Compose** (full profile) | **`http://127.0.0.1:9080`** | Static web UI; API is on another host port (**`3000`** by default). See README. |
+| **Docker Compose** (full profile) | **`http://127.0.0.1:9080`** | Run **`npm run compose:full`** from the repo (see README). Static web UI; API on host port **`3000`** by default. |
 
 If nothing loads, confirm Postgres is up, the API is running, and you are using the URL your administrator documented.
 

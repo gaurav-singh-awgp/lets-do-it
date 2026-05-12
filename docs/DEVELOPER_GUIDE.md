@@ -54,6 +54,10 @@ npm run lint
 npm run check:readme
 ```
 
+### Docker Compose (plugin vs standalone)
+
+Use **`npm run compose:postgres`**, **`npm run compose:full`**, or **`npm run compose:down`** (see root README). They invoke **`scripts/compose.sh`**, which runs **`docker compose`** when the V2 plugin is available and falls back to **`docker-compose`** otherwise.
+
 Coverage and CI-style gates: **`npm run test:coverage`**, **`npm run test:coverage:ci`**. See README **Test** and **`docs/qa/index.md`**.
 
 ---

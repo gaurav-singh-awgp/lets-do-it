@@ -25,6 +25,10 @@ npm run test
 
 API integration tests need **`DATABASE_URL`** (see root **`README.md`**). E2E needs Playwright Chromium (`npx playwright install chromium`) and a reachable Postgres for **`npm run test:e2e`**.
 
+## Docker Compose
+
+Prefer **`npm run compose:postgres`**, **`npm run compose:full`**, and **`npm run compose:down`** so the same commands work whether the machine has the **`docker compose`** plugin or only standalone **`docker-compose`** (see **`scripts/compose.sh`**).
+
 ## Docs
 
 Contributor orientation and links to specs live in **`docs/DEVELOPER_GUIDE.md`**. Product behavior for end users is in **`docs/USER_GUIDE.md`**.

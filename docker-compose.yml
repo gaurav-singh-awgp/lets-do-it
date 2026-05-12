@@ -1,9 +1,8 @@
-# Postgres-only (default): `docker compose up -d postgres` (or `docker-compose up -d postgres`).
+# Postgres-only (default): `npm run compose:postgres` or `sh scripts/compose.sh up -d postgres`.
 # Full stack (api + web + postgres), profile `full`:
-#   docker compose --profile full up -d --build
-# If `docker compose` is not installed (Docker CLI plugin), use standalone Compose v2+:
-#   docker-compose --profile full up -d --build
-#   # or: COMPOSE_PROFILES=full docker-compose up -d --build
+#   npm run compose:full
+#   # or: sh scripts/compose.sh --profile full up -d --build
+# Wrapper `scripts/compose.sh` uses `docker compose` when installed, else `docker-compose`.
 # Published URLs (full profile): web http://127.0.0.1:9080/ , API http://127.0.0.1:3000/ , Postgres 5432.
 # Browser → API on host:3000; SPA build uses VITE_API_BASE_URL=http://127.0.0.1:3000 (see README).
 

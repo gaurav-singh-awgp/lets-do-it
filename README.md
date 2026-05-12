@@ -15,21 +15,27 @@ From the repository root (requires Node **20.19+** or **22.12+** per architectur
 **1. Postgres (Docker)**
 
 ```bash
-docker compose up -d postgres
-# or: docker-compose up -d postgres
+npm run compose:postgres
+# equivalent: sh scripts/compose.sh up -d postgres
 ```
 
 Uses `docker-compose.yml` at the repo root (`postgres:17-alpine`, database `todos`, user/password `todo`).
+
+**Docker Compose CLI:** Some machines have the V2 plugin only (`docker compose`), others only standalone (`docker-compose`). Use **`scripts/compose.sh`** or the **`npm run compose:*`** scripts below — they pick whichever is installed.
 
 **Full stack in Docker (Epic 4 — profile `full`)**
 
 To run **Postgres + API + web** as containers (production-style images; no host Node for api/web):
 
 ```bash
-docker compose --profile full up -d --build
-# If `docker compose` is unavailable, use standalone Compose v2+:
-# docker-compose --profile full up -d --build
-# or: COMPOSE_PROFILES=full docker-compose up -d --build
+npm run compose:full
+# equivalent: sh scripts/compose.sh --profile full up -d --build
+```
+
+Stop the full stack when finished:
+
+```bash
+npm run compose:down
 ```
 
 Then open **`http://127.0.0.1:9080/`** (static SPA). The API is published at **`http://127.0.0.1:3000/`** (health: **`/health`**). Compose sets **`WEB_ORIGIN`** to the web URL and builds the SPA with **`VITE_API_BASE_URL=http://127.0.0.1:3000`** so the browser can reach the API from the host. Do not run this at the same time as **`npm run dev:api`** on port **3000** (port conflict).
@@ -91,10 +97,10 @@ npm run test:e2e                  # see playwright.config.ts (webServer + global
 **E2E wiring (same as `playwright.config.ts`)**
 
 - **`webServer`** runs **`npm run dev:e2e`**, which starts the **API** and **Vite** together against Postgres.
-- **`tests/e2e/global-setup.mjs`** runs **`docker compose up -d`** when Docker is available (ignored if Compose errors, e.g. port **5432** already in use). Skipped automatically when **`CI=true`** (Postgres is already provided by the Actions service container).
+- **`tests/e2e/global-setup.mjs`** runs **`sh scripts/compose.sh up -d`** when Docker is available (ignored if Compose errors, e.g. port **5432** already in use). Skipped automatically when **`CI=true`** (Postgres is already provided by the Actions service container).
 - If **`DATABASE_URL`** is unset, Playwright defaults to **`postgres://todo:todo@127.0.0.1:5432/todos`** — aligned with `docker-compose.yml` and `api/.env.example`.
 
-If the web server health check times out on first run, ensure port **5173** is free. You can run with **`CI=1`** so Playwright always starts a fresh dev server, but **`CI=1`** also skips the Compose startup in `global-setup.mjs`; start Postgres first with `docker compose up -d postgres` (or provide a reachable `DATABASE_URL`).
+If the web server health check times out on first run, ensure port **5173** is free. You can run with **`CI=1`** so Playwright always starts a fresh dev server, but **`CI=1`** also skips the Compose startup in `global-setup.mjs`; start Postgres first with **`npm run compose:postgres`** (or provide a reachable **`DATABASE_URL`**).
 
 **Lint**
 
