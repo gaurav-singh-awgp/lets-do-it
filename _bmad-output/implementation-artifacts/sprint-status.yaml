@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-03T00:00:00Z"
-last_updated: "2026-05-12T21:43:00Z"
+last_updated: "2026-05-12T18:15:17Z"
 # Epic 2 retrospective completed (epic-2-retro-2026-05-12.md) on 2026-05-12
 # Story 3.1 code review complete (bmad-code-review) on 2026-05-12 — status done
 # Story 3.1 ready for code review (bmad-dev-story) on 2026-05-12 — status review
@@ -86,7 +86,7 @@ development_status:
 
   epic-3: in-progress
   3-1-patch-api-v1-todos-by-id-for-done-only-updates: done
-  3-2-accessible-done-toggle-with-completed-styling: backlog
+  3-2-accessible-done-toggle-with-completed-styling: done
   3-3-end-to-end-smoke-for-sc-01-core-loop: backlog
   3-4-ci-matrix-unit-e2e-and-axe-gate-on-list-view: backlog
   epic-3-retrospective: optional

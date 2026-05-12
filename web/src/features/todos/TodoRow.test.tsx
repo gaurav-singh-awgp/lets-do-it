@@ -11,6 +11,38 @@ const sample = {
 };
 
 describe("TodoRow", () => {
+  describe("done styling and a11y", () => {
+    it("US-3.2.a: done=true — .todo-text.done class applied and checkbox checked", () => {
+      const doneTodo = { ...sample, done: true };
+      render(
+        <TodoRow todo={doneTodo} onToggle={vi.fn()} onDelete={vi.fn()} />,
+      );
+      expect(screen.getByRole("checkbox")).toBeChecked();
+      expect(screen.getByText(doneTodo.text)).toHaveClass("done");
+    });
+
+    it("US-3.2.b: toggle checkbox — onToggle called and aria-checked sync is verified", async () => {
+      const user = userEvent.setup();
+      const onToggle = vi.fn();
+      const { rerender } = render(
+        <TodoRow todo={sample} onToggle={onToggle} onDelete={vi.fn()} />,
+      );
+      const cb = screen.getByRole("checkbox");
+      expect(cb).not.toBeChecked();
+      await user.click(cb);
+      expect(onToggle).toHaveBeenCalledWith(sample.id, true);
+      // Controlled input: parent state update drives aria-checked/checked sync.
+      rerender(
+        <TodoRow
+          todo={{ ...sample, done: true }}
+          onToggle={onToggle}
+          onDelete={vi.fn()}
+        />,
+      );
+      expect(screen.getByRole("checkbox")).toBeChecked();
+    });
+  });
+
   it("calls onToggle when checkbox changes", async () => {
     const user = userEvent.setup();
     const onToggle = vi.fn();

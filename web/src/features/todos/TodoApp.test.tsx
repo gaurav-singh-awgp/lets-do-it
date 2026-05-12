@@ -399,6 +399,40 @@ describe("TodoApp", () => {
       expect(screen.getByText("Buy eggs")).toBeVisible();
     });
 
+    it("IS-3.2.a: PATCH failure — prior done state shown + patchDelBanner error visible", async () => {
+      const user = userEvent.setup();
+      const todo: Todo = {
+        id: "00000000-0000-4000-8000-000000000044",
+        text: "Toggle fail test",
+        done: false,
+        createdAt: "2024-01-01T00:00:00.000Z",
+      };
+      server.use(
+        http.get("*/api/v1/todos", () => HttpResponse.json([todo])),
+        http.patch("*/api/v1/todos/*", () =>
+          HttpResponse.json(
+            {
+              error: {
+                code: "INTERNAL",
+                message: "Server error",
+                requestId: "r1",
+              },
+            },
+            { status: 500 },
+          ),
+        ),
+      );
+      renderWithClient();
+      const cb = await screen.findByRole("checkbox");
+      await user.click(cb);
+      await waitFor(() =>
+        expect(screen.getByRole("alert")).toHaveTextContent("Server error"),
+      );
+      // Checkbox shows server-last-known state (done: false) and is re-enabled
+      expect(screen.getByRole("checkbox")).not.toBeChecked();
+      expect(screen.getByRole("checkbox")).not.toBeDisabled();
+    });
+
     it("IS-2.4.a: DELETE last item → empty state restores", async () => {
       const user = userEvent.setup();
       const todo: Todo = {

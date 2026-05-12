@@ -16,7 +16,7 @@ export function TodoRow({
   busyDelete,
 }: Props) {
   return (
-    <div className="todo-row">
+    <div className="todo-row" aria-busy={busyToggle || undefined}>
       <label className="todo-label">
         <input
           type="checkbox"

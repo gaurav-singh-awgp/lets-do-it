@@ -42,3 +42,8 @@
 - D2: IS-/US- test taxonomy convention is undocumented and inconsistently applied across the test suite. Define in a CONTRIBUTING or testing guide in a future housekeeping pass.
 - D3: TOCTOU race — concurrent DELETE + PATCH on the same todo ID exercises an unguarded path in `patchTodo` (findById succeeds then updateDone on a deleted row). Pre-existing architecture gap; address when concurrency SLAs are defined.
 - D4: README does not document the `500` response for PATCH (consistent with DELETE, which also omits it). Pre-existing documentation pattern; align in a future API contract docs pass.
+
+## Deferred from: code review of 3-2-accessible-done-toggle-with-completed-styling.md (2026-05-12)
+
+- Row `aria-busy` semantics omit delete-pending state in `TodoRow` (`aria-busy` currently reflects `busyToggle` only). Deferred as a pre-existing/out-of-scope a11y consistency gap for Story 3.2.
+- `TodoApp` uses a single `patch.variables?.id` pending tracker, which can misattribute busy state during overlapping toggle mutations. Deferred as a broader pre-existing concurrency-state concern.

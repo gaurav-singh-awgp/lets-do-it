@@ -50,6 +50,32 @@ test.describe("todo journeys", () => {
     await expect(page.getByTestId("todo-empty")).toBeVisible();
   });
 
+  test("ES-3.2.a: keyboard Space on checkbox toggles done styling", async ({ page }) => {
+    let patchCalls = 0;
+    await page.route("**/api/v1/todos/*", async (route) => {
+      if (route.request().method() === "PATCH") {
+        patchCalls += 1;
+      }
+      await route.continue();
+    });
+
+    await page.goto("/");
+    await page.getByPlaceholder(/what needs doing/i).fill("Keyboard toggle test");
+    await page.getByRole("button", { name: /^add$/i }).click();
+    await expect(page.getByText("Keyboard toggle test")).toBeVisible();
+
+    const row = page.locator("li").filter({ hasText: "Keyboard toggle test" });
+    const checkbox = row.getByRole("checkbox", {
+      name: /toggle done for keyboard toggle test/i,
+    });
+    await checkbox.focus();
+    await page.keyboard.press("Space");
+
+    await expect(checkbox).toBeChecked();
+    await expect(row.locator(".todo-text.done")).toContainText("Keyboard toggle test");
+    expect(patchCalls).toBeGreaterThan(0);
+  });
+
   test("error handling on create", async ({ page }) => {
     await page.route("**/api/v1/todos", async (route) => {
       const req = route.request();
