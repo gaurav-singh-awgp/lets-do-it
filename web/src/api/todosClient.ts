@@ -5,6 +5,10 @@ export type Todo = {
   createdAt: string;
 };
 
+/** Shown when list GET succeeds but the body is not usable JSON array of todos. */
+export const LIST_TODOS_FAILED_MESSAGE =
+  "We couldn't load your todos.";
+
 const prefix = import.meta.env.VITE_API_BASE_URL ?? "";
 
 /**
@@ -55,7 +59,16 @@ async function buildResponseError(res: Response): Promise<Error> {
 export async function listTodos(): Promise<Todo[]> {
   const res = await fetch(`${prefix}/api/v1/todos`);
   if (!res.ok) throw await buildResponseError(res);
-  return res.json() as Promise<Todo[]>;
+  let raw: unknown;
+  try {
+    raw = await res.json();
+  } catch {
+    throw new Error(LIST_TODOS_FAILED_MESSAGE);
+  }
+  if (!Array.isArray(raw)) {
+    throw new Error(LIST_TODOS_FAILED_MESSAGE);
+  }
+  return raw as Todo[];
 }
 
 export async function createTodo(text: string): Promise<Todo> {

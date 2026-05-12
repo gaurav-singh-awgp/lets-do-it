@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import {
   ApiEnvelopeError,
+  LIST_TODOS_FAILED_MESSAGE,
   createTodo,
   deleteTodo,
   listTodos,
@@ -26,14 +27,12 @@ function patchDelErrorMessage(
   return undefined;
 }
 
-const GENERIC_LOAD_FAILURE = "We couldn't load your todos.";
-
 function loadErrorDisplayMessage(error: Error | null | undefined): string {
   if (error instanceof ApiEnvelopeError) {
     const m = error.message.trim();
     if (m.length > 0) return m;
   }
-  return GENERIC_LOAD_FAILURE;
+  return LIST_TODOS_FAILED_MESSAGE;
 }
 
 const GENERIC_CREATE_FAILURE = "We couldn't add that todo.";
@@ -85,6 +84,7 @@ export function TodoApp() {
     <div className="todo-app">
       {q.isError ? (
         <ErrorBanner
+          key={`list-fetch-${q.failureCount}-${q.errorUpdatedAt}`}
           message={loadErrorDisplayMessage(q.error)}
           onRetry={() => {
             void q.refetch();
