@@ -12,10 +12,12 @@ stepsCompleted:
   - step-e-01-discovery
   - step-e-02-review
   - step-e-03-edit
-lastEdited: "2026-05-02"
+lastEdited: "2026-05-13"
 editHistory:
   - date: "2026-05-02"
     changes: "Validation-guided edit — classification; V1 text immutability; SC-01 scripted check; NFR-06/07 explicit gates; SEO/indexing; health endpoint moved to Growth."
+  - date: "2026-05-13"
+    changes: "Sprint change approval: NFR-08–NFR-11 (containers, coverage, QA evidence, BMAD/AI narrative); Epic 4 backlog alignment."
 documentCounts:
   briefCount: 1
   researchCount: 0
@@ -168,6 +170,10 @@ Each FR is **testable** and maps to journeys. V1 **does not** include post-creat
 | NFR-05 | **Secrets** not committed; configuration via env | Secret scan in CI (recommended) |
 | NFR-06 | **Codebase maintainability** | Root **README** on main branch **must** contain three explicit blocks (headings or linked sections): **Run** (start API + client locally), **Test** (how to execute automated tests), **API contract** (link or path to OpenAPI/Swagger or equivalent static description). **Pass:** CI job or release checklist verifies all three on each release candidate. |
 | NFR-07 | **Accessibility** | Default branch CI **must** run automated a11y checks (e.g. axe) against the **main list view** (add/complete/delete paths exercised); **zero critical** violations reported by that tool on the checked snapshot. |
+| NFR-08 | **Containerized runnable stack** | Documented `docker compose` path brings up **postgres + api + web**; images use **non-root** runtime where practical; **health checks** wired to **`GET /health`** (API) and HTTP **200** on served UI root (web). **Owner:** Epic 4 / DevOps narrative. |
+| NFR-09 | **Coverage reporting** | Repo exposes **Vitest coverage** via npm scripts; optional CI fails if line coverage on **agreed file globs** drops below **70%**, with documented exclusions for generated or boilerplate paths. |
+| NFR-10 | **QA evidence pack** | `docs/qa/` (or agreed path) holds assessor-facing summaries: coverage, accessibility (CI + manual notes), security checklist, performance notes tied to NFR-01/NFR-02 hooks. |
+| NFR-11 | **BMAD + AI narrative** | Maintainer docs describe how BMAD artifacts drove implementation and capture **AI integration** (agents, prompts, MCP usage, limitations, human overrides). |
 
 ## Traceability Summary
 
@@ -186,6 +192,7 @@ Each FR is **testable** and maps to journeys. V1 **does not** include post-creat
 |---------|--------|
 | refined-2026-05-02 | Expanded from PDF seed to full PRD sections; added companion product brief. |
 | validation-guided-2026-05-02 | Edit workflow: `classification`, deployment default, SC-01 owner/script, immutable text V1, SEO subsection, FR-11 → Growth (ops health), NFR-06/07 CI/README gates, FR table FR-01–FR-10. |
+| sprint-change-2026-05-13 | Correct Course approval (batch): **NFR-08–NFR-11** for containerized deployment, coverage gate option, QA evidence pack, BMAD/AI narrative; **Epic 4** in epics backlog. |
 
 ## Provided requirements source (archival)
 

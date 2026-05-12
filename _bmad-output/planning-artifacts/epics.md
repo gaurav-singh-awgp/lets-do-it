@@ -16,7 +16,7 @@ workflowNotes: "CE completed in a single session; formal step menus waived to de
 
 ## Overview
 
-This document provides the complete epic and story breakdown for **lets-do-it**, decomposing requirements from the PRD, UX design specification, and architecture into implementable stories. V1 is an unauthenticated personal todo web app with a split **Fastify API** + **Vite React** client, **PostgreSQL** via **Drizzle**, **TanStack Query**, and **REST + OpenAPI** under `/api/v1/todos`.
+This document provides the complete epic and story breakdown for **lets-do-it**, decomposing requirements from the PRD, UX design specification, and architecture into implementable stories. V1 is an unauthenticated personal todo web app with a split **Fastify API** + **Vite React** client, **PostgreSQL** via **Drizzle**, **TanStack Query**, and **REST + OpenAPI** under `/api/v1/todos`. **Epic 4** adds **containerized deployment**, **coverage policy**, and **assessor-facing documentation** aligned with external training / portfolio rubrics (see PRD NFR-08–NFR-11).
 
 ## Test strategy (unit · integration · E2E)
 
@@ -75,6 +75,14 @@ NFR-05: **Secrets** not committed; configuration via env (secret scan in CI reco
 NFR-06: Root **README** on main branch **must** contain explicit **Run**, **Test**, and **API contract** blocks (link or path to OpenAPI or equivalent); verified on release candidates.
 
 NFR-07: Default branch CI **must** run automated a11y checks (e.g. axe) on the **main list view** (add/complete/delete paths exercised); **zero critical** violations on the checked snapshot.
+
+NFR-08: **Containerized stack (training / portfolio alignment)** — `docker compose` (or documented profile) can bring up **postgres + api + web** so the app is reachable without host-installed Node for operators who use images only; images use **non-root** runtime where practical and declare **health checks** (API: `GET /health`; web: HTTP 200 on served document).
+
+NFR-09: **Test coverage reporting** — repo provides **`npm` scripts** (root and/or workspaces) to produce **Vitest coverage** reports; optional CI gate: **≥ 70%** line coverage on agreed file globs (exclude generated/boilerplate via documented exclusions).
+
+NFR-10: **QA evidence pack** — committed or CI-generated summaries under `docs/qa/` (or agreed path): coverage summary, accessibility (reference CI axe gate + manual notes), lightweight security review checklist, performance notes (link to NFR-01/NFR-02 hooks).
+
+NFR-11: **BMAD + AI process narrative** — short maintainer-facing docs: how BMAD artifacts drove implementation; separate **AI integration log** (agents, prompts patterns, MCP usage, gaps, human overrides).
 
 ### Additional Requirements
 
@@ -156,6 +164,8 @@ NFR-06: Epic 1 — README blocks + OpenAPI linkage; maintained in later stories 
 
 NFR-07: Epic 1 (baseline), Epic 3 (full list-path coverage + CI gate).
 
+NFR-08–NFR-11: Epic 4 — container images + full-stack compose, coverage scripts/gate, QA evidence docs, BMAD/AI narrative.
+
 UX-DR1–UX-DR15: Epics 1–3 as mapped per stories below (tokens/shell early; row/composer/delete/toggle/a11y/retry throughout).
 
 ## Epic List
@@ -185,6 +195,14 @@ Users can toggle **done** with accessible, visually distinct states; mutation lo
 **NFRs:** NFR-01–NFR-03 (documented measurement hooks), NFR-07 (full), remaining NFR-06 polish when routes change.
 
 **UX-DRs:** UX-DR7 (toggle), UX-DR8–UX-DR12, UX-DR13 refinement.
+
+### Epic 4: Containerize, gate coverage, and ship assessor evidence
+
+After this epic, operators can run **`api` + `web` + `postgres` via Docker Compose** (documented profile), CI or local scripts emit **coverage reports** with an optional **≥ 70%** threshold on agreed paths, and **`docs/`** contains a **QA evidence pack** plus **BMAD narrative** and **AI integration log** for training or portfolio submission. **No change** to core todo FRs unless a container networking bug forces a config-only adjustment.
+
+**FRs covered:** None new — operational and documentation only.
+
+**NFRs:** NFR-08–NFR-11; reinforces NFR-04/NFR-05 in container contexts (secrets via env, TLS termination documented if behind reverse proxy).
 
 ---
 
@@ -612,16 +630,164 @@ So that **NFR-06 and NFR-07 stay true on main**.
 
 ---
 
+## Epic 4: Containerize, gate coverage, and ship assessor evidence
+
+Deliver **production-style container images** for `api` and `web`, a **Compose topology** that runs **postgres + api + web** together, **coverage reporting** (optional CI threshold per NFR-09), and **documentation** (QA pack, BMAD narrative, AI integration log) for training or portfolio assessors—without changing core todo behavior.
+
+### Story 4.1: API Dockerfile — multi-stage, non-root, health-aligned
+
+As a **maintainer**,
+I want **a production-oriented `Dockerfile` for `api/`**,
+So that **the Fastify service runs reproducibly in containers with a verifiable health signal**.
+
+**Acceptance Criteria:**
+
+**Given** Epic 3 complete  
+**When** `docker build -f api/Dockerfile .` (or agreed context path) runs  
+**Then** the image runs **`npm run start`** (or documented `node` entry) with **`DATABASE_URL`** supplied at runtime  
+**And** runtime user is **non-root** where the base image allows  
+**And** **`HEALTHCHECK`** (or Compose `healthcheck`) probes **`GET /health`** successfully  
+**And** architecture “Containerized deployment” section lists build args, exposed port, and env contract
+
+**Traces:** NFR-08; architecture container topology.
+
+**Test scenarios**
+
+- **Unit — `US-4.1.*`:** Dockerfile lint (e.g. `hadolint`) optional; document if skipped.
+- **Integration — `IS-4.1.*`:** Given built image **When** container starts with test `DATABASE_URL` **Then** `/health` returns **200** JSON `{ ok: true }`.
+- **E2E — `ES-4.1.*`:** N/A (infra story).
+
+### Story 4.2: Web Dockerfile — static build and minimal serve
+
+As a **maintainer**,
+I want **a `Dockerfile` for `web/` that builds the SPA and serves it with a tiny static server or nginx**,
+So that **the UI is reachable inside Compose without `vite dev`**.
+
+**Acceptance Criteria:**
+
+**Given** Story 4.1 planned or parallel  
+**When** image builds from `web/` source  
+**Then** production build output is served on a documented internal port  
+**And** **`VITE_API_BASE_URL`** (or build-time `import.meta.env`) is documented for pointing the browser to the **api** service from user agents  
+**And** non-root + health probe (HTTP **200** on `/`) documented
+
+**Traces:** NFR-08.
+
+**Test scenarios**
+
+- **Integration — `IS-4.2.*`:** Given container **When** `curl` root **Then** **200** and HTML references built assets.
+
+### Story 4.3: Docker Compose — full stack, networking, optional profiles
+
+As a **maintainer**,
+I want **`docker-compose.yml` (or override file) to orchestrate postgres, api, and web**,
+So that **`docker compose up` brings up a working todo app** per training rubric.
+
+**Acceptance Criteria:**
+
+**Given** Stories 4.1–4.2 images exist  
+**When** operator runs documented **`docker compose`** command (with profile if used)  
+**Then** **web** UI loads in browser and CRUD works against **api** → **postgres**  
+**And** service names, ports published to host, and env files (`.env.example` updates) are documented  
+**And** optional **profiles** (e.g. `db-only` vs `full`) preserve today’s “Postgres only” dev workflow if desired
+
+**Traces:** NFR-08.
+
+**Test scenarios**
+
+- **Integration — `IS-4.3.*`:** Script or manual checklist: compose **up** → create todo in UI → persists after **api** restart (optional stretch).
+
+### Story 4.4: README — parity for container path
+
+As a **new contributor**,
+I want **README Run/Test sections to describe host-dev and container-full-stack paths**,
+So that **NFR-06 stays the single source of truth**.
+
+**Acceptance Criteria:**
+
+**Given** Story 4.3 complete  
+**When** reader follows **Run** for Compose-only operators  
+**Then** they reach a working app without undisclosed steps  
+**And** `check:readme` (or equivalent) still passes; **Test** section references coverage command if Story 4.5 merged
+
+**Traces:** NFR-06, NFR-08.
+
+### Story 4.5: Vitest coverage — scripts and optional CI threshold
+
+As a **maintainer**,
+I want **`vitest --coverage` for `api` and `web` plus an optional ≥70% gate**,
+So that **NFR-09 is measurable**.
+
+**Acceptance Criteria:**
+
+**Given** agreed coverage globs documented  
+**When** `npm run test:coverage` (root) runs  
+**Then** HTML or lcov output is produced under a documented path  
+**And** if CI gate enabled: falling below threshold fails the job with clear logs  
+**And** exclusions list is justified (generated files, config stubs)
+
+**Traces:** NFR-09.
+
+**Test scenarios**
+
+- **Unit — `US-4.5.*`:** Threshold config file exists and is imported by Vitest.
+
+### Story 4.6: QA evidence pack — coverage, a11y, security, performance notes
+
+As an **assessor**,
+I want **`docs/qa/` summaries**,
+So that **Step 4 QA deliverables exist as artifacts**.
+
+**Acceptance Criteria:**
+
+**Given** CI and local commands from Epics 1–4  
+**When** reviewer opens `docs/qa/`  
+**Then** files (or single index) summarize: coverage posture, a11y (link to axe/CI), security checklist outcome, performance (NFR-01/NFR-02 hooks + any DevTools/Lighthouse notes)  
+**And** dates and commit SHA or version noted for submission snapshot
+
+**Traces:** NFR-10.
+
+### Story 4.7: BMAD implementation narrative
+
+As a **learner**,
+I want **one doc explaining how PRD → UX → architecture → epics → CI mapped to code**,
+So that **reviewers see spec-driven discipline**.
+
+**Acceptance Criteria:**
+
+**Given** planning artifacts in `_bmad-output/planning-artifacts/`  
+**When** reader opens agreed path (e.g. `docs/bmad-implementation-narrative.md`)  
+**Then** it traces major decisions with links/paths to source artifacts—not a dump of full PRD
+
+**Traces:** NFR-11.
+
+### Story 4.8: AI integration and MCP usage log
+
+As a **learner**,
+I want **a log of AI agents, prompts patterns, MCP tools, misses, and human overrides**,
+So that **course “AI Integration Documentation” is satisfied**.
+
+**Acceptance Criteria:**
+
+**Given** implementation period  
+**When** reader opens `docs/ai-integration-log.md` (or agreed path)  
+**Then** sections cover: Agent usage, MCP usage, test generation help, debugging wins, limitations, where human judgment was required  
+**And** explicitly notes substitutes (e.g. OpenAPI+tests vs Postman MCP) if a tool was not used
+
+**Traces:** NFR-11.
+
+---
+
 ## Validation summary (Step 4)
 
 - **Test coverage intent:** Each story defines **Test scenarios** (unit / integration / E2E) with scenario IDs `US-*`, `IS-*`, `ES-*` for mapping to automated tests and CI.
 - **FR coverage:** FR-01–FR-10 each appear in at least one story acceptance block or epic mapping above.
 - **Starter template:** Story **1.1** explicitly scaffolds from Fastify + Vite `react-ts` per architecture.
 - **Tables created when needed:** `todos` arrives in **1.2** when persistence is introduced—not before.
-- **Story ordering:** Within each epic, later stories depend only on earlier ones; Epic 2 assumes Epic 1 read path; Epic 3 assumes Epic 2 row/composer/delete.
-- **Epic independence:** Epic 1 delivers a truthful read-only experience; Epic 2 adds create/delete; Epic 3 completes the PRD core loop with toggle and quality gates.
+- **Story ordering:** Within each epic, later stories depend only on earlier ones; Epic 2 assumes Epic 1 read path; Epic 3 assumes Epic 2 row/composer/delete; Epic 4 assumes Epics 1–3 product scope shipped.
+- **Epic independence:** Epic 1 delivers a truthful read-only experience; Epic 2 adds create/delete; Epic 3 completes the PRD core loop with toggle and quality gates; Epic 4 adds packaging, coverage evidence, and assessor docs without new user-facing FRs.
 - **File churn:** Epics deliberately follow vertical slices; some shared files (e.g. `TodoRow`) evolve across Epics 2–3 to avoid duplicate components—acceptable with explicit story sequence.
 
 ---
 
-**Workflow status:** Planning complete; **test strategy** is embedded per story above. Implementation tracking: `_bmad-output/implementation-artifacts/sprint-status.yaml`. Next BMad execution steps: **`bmad-create-story`** / **`bmad-dev-story`** / **`bmad-code-review`** as stories progress.
+**Workflow status:** Planning complete; **test strategy** is embedded per story above. Implementation tracking: `_bmad-output/implementation-artifacts/sprint-status.yaml`. Next BMad execution steps: **`bmad-create-story`** (start with **4.1**) / **`bmad-dev-story`** / **`bmad-code-review`** as stories progress.
