@@ -35,7 +35,11 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-03T00:00:00Z"
-last_updated: "2026-05-13T14:00:00Z"
+last_updated: "2026-05-13T14:05:00Z"
+# Story 2.4 code review complete (bmad-code-review) on 2026-05-12 — status done
+# Story 2.4 implementation complete (bmad-dev-story) on 2026-05-12 — status review
+# Story 2.4 in progress (bmad-dev-story) on 2026-05-12
+# Story 2.4 contexted by bmad-create-story on 2026-05-12
 # Story 2.3 contexted by bmad-create-story on 2026-05-12
 # Epic 1 retrospective completed (epic-1-retro-2026-05-12.md) on 2026-05-12
 # Story 1.5 code review completed by bmad-code-review on 2026-05-12
@@ -72,7 +76,7 @@ development_status:
   2-1-post-api-v1-todos-with-validation-and-immutable-text-rule: done
   2-2-addcomposer-wired-to-create-mutation: done
   2-3-delete-api-v1-todos-by-id: done
-  2-4-todorow-delete-control-with-accessible-labeling: backlog
+  2-4-todorow-delete-control-with-accessible-labeling: done
   epic-2-retrospective: optional
 
   epic-3: backlog

@@ -360,5 +360,72 @@ describe("TodoApp", () => {
       await waitFor(() => expect(screen.getByText("Fix")).toBeVisible());
       expect(postAttempts).toBe(2);
     });
+
+    it("US-2.4.b: DELETE failure — row visible + patchDelBanner error surfaced", async () => {
+      const user = userEvent.setup();
+      const todo: Todo = {
+        id: "00000000-0000-4000-8000-000000000042",
+        text: "Buy eggs",
+        done: false,
+        createdAt: "2024-01-01T00:00:00.000Z",
+      };
+      server.use(
+        http.get("*/api/v1/todos", () => HttpResponse.json([todo])),
+        http.delete("*/api/v1/todos/*", async () => {
+          await delay(40);
+          return HttpResponse.json(
+            {
+              error: {
+                code: "NOT_FOUND",
+                message: "Todo not found",
+                requestId: "r1",
+              },
+            },
+            { status: 404 },
+          );
+        }),
+      );
+
+      renderWithClient();
+      await waitFor(() => expect(screen.getByText("Buy eggs")).toBeVisible());
+      const deleteButton = screen.getByRole("button", { name: "Delete Buy eggs" });
+      await user.click(deleteButton);
+
+      await waitFor(() => expect(deleteButton).toBeDisabled());
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Todo not found",
+      );
+      expect(screen.getByText("Buy eggs")).toBeVisible();
+    });
+
+    it("IS-2.4.a: DELETE last item → empty state restores", async () => {
+      const user = userEvent.setup();
+      const todo: Todo = {
+        id: "00000000-0000-4000-8000-000000000043",
+        text: "Only todo",
+        done: false,
+        createdAt: "2024-01-02T00:00:00.000Z",
+      };
+      let deleteDone = false;
+      server.use(
+        http.get("*/api/v1/todos", () =>
+          HttpResponse.json(deleteDone ? [] : [todo]),
+        ),
+        http.delete("*/api/v1/todos/*", () => {
+          deleteDone = true;
+          return new HttpResponse(null, { status: 204 });
+        }),
+      );
+
+      renderWithClient();
+      await waitFor(() => expect(screen.getByText("Only todo")).toBeVisible());
+      await user.click(screen.getByRole("button", { name: "Delete Only todo" }));
+
+      await waitFor(() =>
+        expect(screen.getByTestId("todo-empty")).toBeVisible(),
+      );
+      expect(screen.queryByText("Only todo")).not.toBeInTheDocument();
+    });
   });
 });

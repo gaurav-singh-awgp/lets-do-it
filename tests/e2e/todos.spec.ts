@@ -40,7 +40,7 @@ test.describe("todo journeys", () => {
     await expect(item.getByRole("checkbox")).toBeChecked();
   });
 
-  test("delete todo", async ({ page }) => {
+  test("ES-2.3.a / ES-2.4.a: delete todo", async ({ page }) => {
     await page.goto("/");
     await page.getByPlaceholder(/what needs doing/i).fill("Temp item");
     await page.getByRole("button", { name: /^add$/i }).click();

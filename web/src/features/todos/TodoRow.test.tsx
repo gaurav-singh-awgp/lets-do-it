@@ -5,7 +5,7 @@ import { TodoRow } from "./TodoRow";
 
 const sample = {
   id: "1",
-  text: "Write tests",
+  text: "Write tests & review",
   done: false,
   createdAt: new Date().toISOString(),
 };
@@ -25,7 +25,7 @@ describe("TodoRow", () => {
     expect(onToggle).toHaveBeenCalledWith("1", true);
   });
 
-  it("calls onDelete when delete is pressed", async () => {
+  it("US-2.4.a: delete button accessible name includes todo title", async () => {
     const user = userEvent.setup();
     const onDelete = vi.fn();
     render(
@@ -35,7 +35,11 @@ describe("TodoRow", () => {
         onDelete={onDelete}
       />,
     );
-    await user.click(screen.getByRole("button", { name: /delete write tests/i }));
+    await user.click(
+      screen.getByRole("button", {
+        name: /delete write tests & review/i,
+      }),
+    );
     expect(onDelete).toHaveBeenCalledWith("1");
   });
 });
