@@ -35,7 +35,8 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-03T00:00:00Z"
-last_updated: "2026-05-13T22:20:00Z"
+last_updated: "2026-05-13T22:30:00Z"
+# Epic 4 retrospective completed (epic-4-retro-2026-05-13.md) on 2026-05-13
 # Story 4.8 implementation complete on 2026-05-13 — status done
 # Story 4.7 implementation complete on 2026-05-13 — status done
 # Story 4.6 implementation complete on 2026-05-13 — status done
@@ -106,7 +107,7 @@ development_status:
   3-4-ci-matrix-unit-e2e-and-axe-gate-on-list-view: done
   epic-3-retrospective: done
 
-  epic-4: in-progress
+  epic-4: done
   4-1-api-dockerfile-multistage-nonroot-health: done
   4-2-web-dockerfile-static-serve-and-env: done
   4-3-docker-compose-full-stack-and-profiles: done
@@ -115,4 +116,4 @@ development_status:
   4-6-qa-evidence-pack-docs-qa: done
   4-7-bmad-implementation-narrative-doc: done
   4-8-ai-integration-and-mcp-usage-log: done
-  epic-4-retrospective: optional
+  epic-4-retrospective: done
