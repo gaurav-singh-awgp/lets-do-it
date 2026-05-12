@@ -35,6 +35,9 @@ function assertNoCriticalViolations(
 }
 
 test.describe("ES-1.6.a — axe on list shell (GET states)", () => {
+  // Do not retry axe gate in CI: a pass-on-retry can hide real violations.
+  test.describe.configure({ retries: 0 });
+
   test.beforeEach(async ({ request }) => {
     await clearTodos(request);
   });

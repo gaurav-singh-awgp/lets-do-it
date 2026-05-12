@@ -6,10 +6,9 @@ const defaultDatabaseUrl =
 export default defineConfig({
   globalSetup: "./tests/e2e/global-setup.mjs",
   testDir: "tests/e2e",
-  fullyParallel: true,
-  // All E2E specs share a single Postgres database; parallel workers cause
-  // cross-spec row interference. Serial execution (workers: 1) is required
-  // until a per-worker DB isolation strategy is designed (retro B2).
+  // Specs share one Postgres database; parallel workers would race on `todos`.
+  // `fullyParallel` is off so intent matches `workers: 1` (serial suite).
+  fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
