@@ -35,7 +35,10 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-03T00:00:00Z"
-last_updated: "2026-05-14T12:00:00Z"
+last_updated: "2026-05-14T18:00:00Z"
+# Story 4.2 code review complete (bmad-code-review) on 2026-05-14 — status done
+# Story 4.2 implementation complete (bmad-dev-story) on 2026-05-14 — status review
+# Story 4.2 contexted by bmad-create-story on 2026-05-14 — status ready-for-dev
 # Story 4.1 code review patches applied; status done (2026-05-14)
 # Story 4.1 implementation complete (bmad-dev-story) on 2026-05-14 — status review
 # Story 4.1 contexted by bmad-create-story on 2026-05-13 — status ready-for-dev
@@ -99,7 +102,7 @@ development_status:
 
   epic-4: in-progress
   4-1-api-dockerfile-multistage-nonroot-health: done
-  4-2-web-dockerfile-static-serve-and-env: backlog
+  4-2-web-dockerfile-static-serve-and-env: done
   4-3-docker-compose-full-stack-and-profiles: backlog
   4-4-readme-container-path-parity-nfr-06: backlog
   4-5-vitest-coverage-scripts-and-ci-threshold: backlog

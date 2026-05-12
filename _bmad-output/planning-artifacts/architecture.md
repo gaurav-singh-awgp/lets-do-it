@@ -559,6 +559,18 @@ If you **omit** a root workspace, README **Test** must still document the three 
 | **Health** | Dockerfile **`HEALTHCHECK`** runs **`/bin/sh -c`** with **`wget`** against **`http://127.0.0.1:${PORT:-3000}/health`** (shell default **3000** when **`PORT`** unset; `$$` in the Dockerfile becomes `$` in the embedded script). **`--start-period=60s`** allows cold migrations. |
 | **Verification** | With **`docker compose`** unavailable on some hosts, use a **user-defined bridge network**: Postgres container + API container on the same network; **`DATABASE_URL`** host = Postgres **service name** (e.g. `postgres://todo:todo@<pg-container-name>:5432/todos`). On Docker Desktop, **`host.docker.internal`** also works against a Postgres bound to the host. Linux: **`--add-host=host.docker.internal:host-gateway`** when reaching host-published ports. |
 
+### `web` image (Story 4.2)
+
+| Topic | Decision |
+|-------|-----------|
+| **Build** | From repo root: `docker build -f web/Dockerfile -t lets-do-it-web:local .` Optional: `--build-arg VITE_API_BASE_URL=<browser-reachable API URL>` (default **`http://127.0.0.1:3000`** baked into the SPA for local demos). |
+| **Stages** | **builder:** `node:22-bookworm-slim`, `npm ci -w web` (with **`api/package.json`** present for workspace lockfile), `npm run build -w web` → **`web/dist`**. **runner:** **`nginxinc/nginx-unprivileged:1.27-alpine`**, static files under **`/usr/share/nginx/html`**, config **`web/docker/default.conf`** → **`/etc/nginx/conf.d/default.conf`**. |
+| **Port** | **`EXPOSE 8080`** — matches **`listen 8080`** in **`default.conf`** (unprivileged nginx). |
+| **SPA routing** | **`try_files $uri $uri/ /index.html`** for client-side routes. |
+| **User** | Base image runs **non-root** nginx worker model (no root-bound listener). |
+| **Health** | **`HEALTHCHECK`** uses **`wget --spider`** against **`http://127.0.0.1:8080/`** (HTTP **200**). |
+| **API from browser** | **`VITE_API_BASE_URL`** is a **build-time** value (see `web/src/api/todosClient.ts`). For Docker Compose in Story 4.3, pick a hostname:port the **host browser** can resolve (often **`http://127.0.0.1:<published-api-port>`**), and align **`WEB_ORIGIN`** on the API with the **web** URL (e.g. **`http://127.0.0.1:<published-web-port>`**). |
+
 **TLS:** Termination at ingress/reverse proxy is acceptable; document that **NFR-04** applies to any internet-facing deployment.
 
 ## Architecture Validation Results
