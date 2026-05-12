@@ -6,6 +6,7 @@ Central map for **lets-do-it**: how to run and change the code, how to use the p
 |----------|----------|----------|
 | **[User guide](USER_GUIDE.md)** | People using the app | Opening the app, adding todos, marking done, deleting, errors and retries, limits. |
 | **[Developer guide](DEVELOPER_GUIDE.md)** | Contributors and operators | Repo layout, env vars, scripts, tests, CI, BMad artifact map, API pointers. |
+| **[Contributing](../CONTRIBUTING.md)** | Contributors | PR checklist, **US-/IS-/ES-** test ID convention, local commands. |
 | **[Root README](../README.md)** | Everyone | **Run**, **Test**, **API contract** (NFR-06); single source for commands. |
 | **[QA evidence pack](qa/index.md)** | Reviewers / assessors | Coverage, a11y, security checklist, performance notes (NFR-10). |
 | **[BMad implementation narrative](bmad-implementation-narrative.md)** | Reviewers / learners | How PRD → UX → architecture → stories mapped to the codebase (NFR-11). |

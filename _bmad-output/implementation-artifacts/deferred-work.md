@@ -2,6 +2,8 @@
 
 Housekeeping pass **2026-05-13** closed several earlier review items (see git history): Playwright `global-setup.mjs` CI guard, Fastify AJV `removeAdditional: false` for PATCH + Zod strict, `listTodos` shape handling, list `ErrorBanner` remount key, `TodoRow` `aria-busy` during delete, README `WEB_ORIGIN` string-equality note, Playwright `fullyParallel: false` + axe suite `retries: 0`.
 
+**Quick dev (deferred follow-up):** `createTodo` / `patchTodo` now validate success JSON (`UnexpectedTodoResponseError`); README documents PATCH **500**; **`CONTRIBUTING.md`** documents **US-/IS-/ES-** test IDs.
+
 ## Remaining (backlog / product / larger refactors)
 
 ### API & contract
@@ -11,7 +13,6 @@ Housekeeping pass **2026-05-13** closed several earlier review items (see git hi
 - Global error handler maps most non-validation errors to **500** `INTERNAL` — extend when product needs finer client-visible codes.
 - JSON Schema (OpenAPI) vs Zod at HTTP boundary — consolidate or lint for drift over time.
 - **OpenAPI POST** documents max length in prose (Unicode code points); JSON Schema `maxLength` omitted on purpose — keep OpenAPI and Zod aligned when contract tooling changes.
-- **README:** PATCH **500** response not spelled out (same pattern as DELETE) — align in a future API docs pass.
 
 ### CORS & config
 
@@ -19,7 +20,6 @@ Housekeeping pass **2026-05-13** closed several earlier review items (see git hi
 
 ### Client
 
-- **`todosClient`:** `createTodo` / `patchTodo` still assume JSON object on success — extend the same defensive pattern as `listTodos` if needed.
 - **`TodoApp`:** single `patch.variables?.id` pending tracker can misattribute busy state on overlapping toggles — broader concurrency UX.
 - **`ErrorBanner`:** still does not move focus on error (optional enhancement).
 
@@ -38,5 +38,4 @@ Housekeeping pass **2026-05-13** closed several earlier review items (see git hi
 ### Architecture / process notes
 
 - **TOCTOU** concurrent DELETE + PATCH on same id — address when concurrency SLAs exist.
-- **IS-/US-** test ID taxonomy — document in CONTRIBUTING when someone owns testing guide.
 - Epic 1 retro note: keep cross-cutting API/README changes inside the story that owns them.

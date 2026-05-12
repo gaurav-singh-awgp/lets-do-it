@@ -9,7 +9,41 @@ export type Todo = {
 export const LIST_TODOS_FAILED_MESSAGE =
   "We couldn't load your todos.";
 
+/** 200/201 success body was not JSON or not a single todo object (camelCase fields). */
+export class UnexpectedTodoResponseError extends Error {
+  constructor(
+    message = "We couldn't read the server's response for this todo.",
+  ) {
+    super(message);
+    this.name = "UnexpectedTodoResponseError";
+  }
+}
+
 const prefix = import.meta.env.VITE_API_BASE_URL ?? "";
+
+function parseTodoResponse(raw: unknown): Todo {
+  if (typeof raw !== "object" || raw === null) {
+    throw new UnexpectedTodoResponseError();
+  }
+  const o = raw as Record<string, unknown>;
+  if (
+    typeof o.id === "string" &&
+    typeof o.text === "string" &&
+    typeof o.done === "boolean" &&
+    typeof o.createdAt === "string"
+  ) {
+    return { id: o.id, text: o.text, done: o.done, createdAt: o.createdAt };
+  }
+  throw new UnexpectedTodoResponseError();
+}
+
+async function readSuccessJson(res: Response): Promise<unknown> {
+  try {
+    return await res.json();
+  } catch {
+    throw new UnexpectedTodoResponseError();
+  }
+}
 
 /**
  * Thrown only when the response body parsed into a recognizable API error envelope
@@ -78,7 +112,8 @@ export async function createTodo(text: string): Promise<Todo> {
     body: JSON.stringify({ text }),
   });
   if (!res.ok) throw await buildResponseError(res);
-  return res.json() as Promise<Todo>;
+  const raw = await readSuccessJson(res);
+  return parseTodoResponse(raw);
 }
 
 export async function patchTodo(id: string, done: boolean): Promise<Todo> {
@@ -88,7 +123,8 @@ export async function patchTodo(id: string, done: boolean): Promise<Todo> {
     body: JSON.stringify({ done }),
   });
   if (!res.ok) throw await buildResponseError(res);
-  return res.json() as Promise<Todo>;
+  const raw = await readSuccessJson(res);
+  return parseTodoResponse(raw);
 }
 
 export async function deleteTodo(id: string): Promise<void> {

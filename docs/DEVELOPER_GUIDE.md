@@ -64,7 +64,7 @@ Coverage and CI-style gates: **`npm run test:coverage`**, **`npm run test:covera
 - **Integration (API):** Vitest + Fastify `inject` + real DB when **`DATABASE_URL`** is set; otherwise those suites may skip.
 - **E2E:** Playwright under **`tests/e2e/`**; **`npm run dev:e2e`** starts API + web for the harness.
 
-Story-driven scenario IDs (for traceability to **`epics.md`**):
+Story-driven scenario IDs (for traceability to **`epics.md`**) are summarized in the root **`CONTRIBUTING.md`**:
 
 - **`US-n.m.*`** — unit tests for story *n.m*
 - **`IS-n.m.*`** — integration

@@ -3,6 +3,7 @@ import { useRef } from "react";
 import {
   ApiEnvelopeError,
   LIST_TODOS_FAILED_MESSAGE,
+  UnexpectedTodoResponseError,
   createTodo,
   deleteTodo,
   listTodos,
@@ -39,6 +40,10 @@ const GENERIC_CREATE_FAILURE = "We couldn't add that todo.";
 
 function createErrorDisplayMessage(error: Error | null | undefined): string {
   if (error instanceof ApiEnvelopeError) {
+    const m = error.message.trim();
+    if (m.length > 0) return m;
+  }
+  if (error instanceof UnexpectedTodoResponseError) {
     const m = error.message.trim();
     if (m.length > 0) return m;
   }
