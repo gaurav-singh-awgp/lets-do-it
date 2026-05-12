@@ -2,12 +2,12 @@
 story_key: 1-3-get-api-v1-todos-with-openapi-and-error-envelope
 story_id: "1.3"
 epic: 1
-status: review
+status: done
 ---
 
 # Story 1.3: GET /api/v1/todos with OpenAPI and error envelope
 
-Status: review
+Status: done
 
 <!-- Optional: run validate-create-story (`bmad-create-story` · validate) before `bmad-dev-story`. -->
 
@@ -125,6 +125,7 @@ Read completely before editing: **`api/src/app.ts`**, **`api/src/routes/todos.ts
 
 ## Change Log
 
+- 2026-05-12: Closed code-review decisions — single `WEB_ORIGIN` (`resolveWebOrigin`), Helmet CSP relaxed for Swagger UI inline scripts, POST OpenAPI `text` aligned with Zod (removed `maxLength`), README CORS note; sprint status **done**.
 - 2026-05-05: Implemented OpenAPI route schemas (todos + shared error envelope), Fastify validation/serialization error mapping in `setErrorHandler`, unit tests (service list mapping, Zod flatten, GET 5xx envelope), integration tests (IS-1.3.a ordering, OpenAPI JSON route), README API contract updates.
 
 ## Dev Agent Record
@@ -139,8 +140,11 @@ GPT-5.2 (Cursor)
 
 - Added **`api/src/lib/openapi-schemas.ts`** for shared JSON Schema fragments used in route `schema` blocks and Swagger.
 - **`registerTodoRoutes`**: OpenAPI **`tags`**, **`summary`**, request/response schemas for **GET/POST/PATCH/DELETE**; **GET** documents **200** array of todo DTO and **500** error envelope.
-- **`buildApp` `setErrorHandler`**: **400** + envelope when Fastify **`validation`** array is present; **500** envelope for **`FST_ERR_RESPONSE_SERIALIZATION`**; default **500** `INTERNAL` otherwise.
-- **IS-1.3.b** covered by **`todos-get-error.unit.test.ts`** (mock `listTodos` throws; asserts **`requestId`** matches **`genReqId`**).
+- **`buildApp` `setErrorHandler`**: **400** + envelope when Fastify exposes a **`validation`** payload (array or other shape); **500** envelope for **`FST_ERR_RESPONSE_SERIALIZATION`**; default **500** `INTERNAL` otherwise.
+- **CORS `WEB_ORIGIN`:** **`resolveWebOrigin`** in **`api/src/http/resolve-web-origin.ts`** — single origin, rejects comma-separated values; documented in **`README.md`** and **`api/.env.example`**.
+- **Helmet / Swagger UI:** **`@fastify/helmet`** registered with **`contentSecurityPolicy.directives`** overriding **`scriptSrc`**, **`connectSrc`**, **`workerSrc`**, **`imgSrc`** so **`/documentation`** can load Swagger’s inline scripts and fetch **`/documentation/json`**.
+- **POST OpenAPI vs Zod:** **`createTodoBodyOpenApi.text`** omits **`maxLength`**; description states the **Unicode code-point** cap is enforced at runtime by Zod (avoids JSON Schema string-length vs code-point drift).
+- **IS-1.3.b (5xx envelope + `requestId`):** **`todos-get-error.unit.test.ts`** (mocked `listTodos`). **Product decision (2026-05-12):** accept unit-only coverage; no separate DB-down integration test required for this story.
 - **ES-1.3** not added (explicitly optional per epic); integration suite still **`skipIf`** without **`DATABASE_URL`**.
 
 ### File List
@@ -151,10 +155,56 @@ GPT-5.2 (Cursor)
 - `api/src/services/todo.service.test.ts`
 - `api/src/schemas/todo.zod.test.ts`
 - `api/src/routes/todos-get-error.unit.test.ts`
+- `api/src/http/resolve-web-origin.ts`
+- `api/src/http/resolve-web-origin.test.ts`
 - `api/src/todos.integration.test.ts`
 - `README.md`
+- `api/.env.example`
 - `_bmad-output/implementation-artifacts/1-3-get-api-v1-todos-with-openapi-and-error-envelope.md`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+
+### Review Findings
+
+Code review (2026-05-04). Layers: Blind Hunter, Edge Case Hunter, Acceptance Auditor. Edge output was wrapped in extra markup; JSON was parsed successfully.
+
+- [x] [Review][Decision] CORS and `WEB_ORIGIN` strategy — **Resolved (2026-05-12):** Single origin only — `resolveWebOrigin()` rejects comma-separated values; default `http://127.0.0.1:5173` when unset; README + `.env.example` updated.
+
+- [x] [Review][Decision] Helmet vs Swagger UI — **Resolved (2026-05-12):** Tune Helmet `contentSecurityPolicy` in `buildApp` (`scriptSrc` + `connectSrc` + `workerSrc` + `imgSrc`) so Swagger UI under `/documentation` loads.
+
+- [x] [Review][Decision] POST OpenAPI `maxLength` vs Zod Unicode cap — **Resolved (2026-05-12):** Removed OpenAPI `maxLength` on POST `text`; description documents runtime Zod Unicode code-point enforcement.
+
+- [x] [Review][Decision] IS-1.3.b test shape — **Resolved (2026-05-12):** Accept unit-only coverage (`todos-get-error.unit.test.ts`); no additional DB-unreachable integration scenario required for this story.
+
+- [x] [Review][Patch] Close pool if `runMigrations` throws after `createPool` — `api/src/app.ts` (after pool creation, before `onClose` registers) — Edge: leaked connections until process exit if migration fails mid-startup.
+
+- [x] [Review][Patch] Map non-array Fastify `validation` to 400 envelope — `api/src/app.ts` (`readFastifyValidation`) — **Resolved:** any defined `validation` value is returned as `details` on **400** `VALIDATION` (previously only arrays were treated as validation errors).
+
+- [x] [Review][Patch] Add `additionalProperties: false` to POST `createTodoBodyOpenApi` — `api/src/routes/todos.ts` — Matches PATCH contract strictness; reduces silent acceptance of extra JSON fields at documentation vs runtime layers.
+
+- [x] [Review][Patch] Clarify README migration wording — `README.md` — Reduce ambiguity about owning schema lifecycle when both `npm run db:migrate -w api` and startup migrations apply.
+
+- [x] [Review][Patch] Reword Dev Agent Record IS-1.3.b line — This file, Dev Agent Record — Avoid implying the integration-style IS-1.3.b scenario from the story is fully satisfied by the unit test alone until Decision above is resolved.
+
+- [x] [Review][Defer] Unbounded `GET /api/v1/todos` list (no pagination) [`api/src/routes/todos.ts`] — deferred, pre-existing product backlog; not required by Story 1.3 ACs.
+
+- [x] [Review][Defer] `buildApp` requires `DATABASE_URL` and runs migrations on boot [`api/src/app.ts`] — deferred, pre-existing architectural choice for this API slice.
+
+- [x] [Review][Defer] Broad 500 `INTERNAL` mapping for non-validation failures [`api/src/app.ts`] — deferred, pre-existing; finer-grained codes are out of story scope.
+
+- [x] [Review][Defer] Parallel JSON Schema / Zod / TypeScript maintenance drift risk [`api/src/lib/openapi-schemas.ts`, `api/src/routes/todos.ts`] — deferred, pre-existing technical debt; consider `zod-to-json-schema` or similar in a later story.
+
+- [x] [Review][Defer] Integration suite skipped without `DATABASE_URL` [`api/src/todos.integration.test.ts`] — deferred, pre-existing test harness tradeoff; documented via `describe.skipIf`.
+
+- [x] [Review][Defer] `sendError` falls back to `randomUUID()` when `requestId` omitted [`api/src/lib/errors.ts`] — deferred, pre-existing; routes under review pass `rid(request)` for GET failures.
+
+### Re-review (2026-05-12)
+
+Spec: this file. Diff basis: `git diff HEAD` on `api/`, `README.md`, plus full read of handlers against ACs. Layers: Blind Hunter, Edge Case Hunter, Acceptance Auditor (single consolidated pass).
+
+- **Prior `[Review][Patch]` rows:** Confirmed in tree — `buildApp` ends the pool if `runMigrations` throws; `readFastifyValidation` forwards any non-undefined `validation` shape to the **400** envelope; POST `createTodoBodyOpenApi` sets `additionalProperties: false`; README documents shared Drizzle migrator for CLI vs startup.
+- **AC 1–5:** No regressions observed; implementation still matches acceptance criteria for the reviewed paths.
+- **`[Review][Decision]` rows:** Closed same day with explicit product/tech choices (single `WEB_ORIGIN`, CSP tuned for Swagger, OpenAPI aligned with Zod, IS-1.3.b unit-only).
+- **New findings:** None material. **Dismissed:** theoretical `validation: null` yielding `details: null` (unlikely Fastify shape; cosmetic if it ever occurred).
 
 ---
 

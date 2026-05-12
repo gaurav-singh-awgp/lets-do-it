@@ -15,6 +15,7 @@ npm-debug.log*
 .DS_Store
 coverage/
 .playwright/
+test-results/.last-run.json
 
 # Vite
 web/dist/

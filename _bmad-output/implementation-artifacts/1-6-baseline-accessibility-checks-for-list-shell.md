@@ -4,11 +4,11 @@
 
 story_id: "1.6"
 epic: 1
-status: review
+status: done
 
 # Story 1.6: Baseline accessibility checks for list shell
 
-Status: review
+Status: done
 
 Ultimate context engine analysis completed - comprehensive developer guide created
 
@@ -78,10 +78,10 @@ So that **we do not accumulate WCAG debt before features land**.
 
 ### Review Findings
 
-- [ ] [Review][Patch] `last_updated` moved backwards in sprint tracker [_bmad-output/implementation-artifacts/sprint-status.yaml:38]
-- [ ] [Review][Patch] Untracked Story 1.6 implementation files are omitted from `git diff HEAD` review scope [web/src/features/todos/TodoApp.a11y.test.tsx:1]
-- [ ] [Review][Patch] Ephemeral test run artifact is tracked in working tree [test-results/.last-run.json:1]
-- [ ] [Review][Patch] Unrelated Story 1.3/project-context edits are mixed into this Story 1.6 review scope [_bmad-output/implementation-artifacts/1-3-get-api-v1-todos-with-openapi-and-error-envelope.md:1]
+- [x] [Review][Patch] `last_updated` moved backwards in sprint tracker [_bmad-output/implementation-artifacts/sprint-status.yaml:38] — resolved by moving `last_updated` forward during review completion sync.
+- [x] [Review][Patch] Untracked Story 1.6 implementation files are omitted from `git diff HEAD` review scope [web/src/features/todos/TodoApp.a11y.test.tsx:1] — resolved by staging Story 1.6 files before scoped diff review.
+- [x] [Review][Patch] Ephemeral test run artifact is tracked in working tree [test-results/.last-run.json:1] — resolved by removing the file from tracking and adding `.gitignore` rule.
+- [x] [Review][Patch] Unrelated Story 1.3/project-context edits are mixed into this Story 1.6 review scope [_bmad-output/implementation-artifacts/1-3-get-api-v1-todos-with-openapi-and-error-envelope.md:1] — resolved by switching to an explicit Story 1.6 file-list scoped diff for review.
 - [x] [Review][Defer] Unit/E2E use different axe-core versions may yield inconsistent violation outcomes [package-lock.json:171] — deferred, pre-existing
 
 ## Dev Notes
@@ -234,6 +234,7 @@ Claude Sonnet 4.6 (Cursor)
 
 - **2026-05-12:** Story context created by `bmad-create-story` — status `ready-for-dev`.
 - **2026-05-12:** Implementation complete by `bmad-dev-story` (Claude Sonnet 4.6) — all ACs satisfied, 4 unit a11y tests + 3 Playwright axe tests + noindex meta — status `review`.
+- **2026-05-12:** `bmad-code-review` applied all patch findings, deferred tooling drift note logged, and story moved to `done`.
 
 ---
 

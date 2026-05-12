@@ -1,7 +1,10 @@
 {
   "name": "lets-do-it",
   "private": true,
-  "workspaces": ["api", "web"],
+  "workspaces": [
+    "api",
+    "web"
+  ],
   "scripts": {
     "check:readme": "node scripts/check-readme-sections.mjs",
     "lint": "npm run lint -w web",
@@ -16,6 +19,7 @@
     "dev:e2e": "concurrently -k -n api,web -c blue,green \"npm run dev -w api\" \"wait-on -t 120000 -i 500 http://127.0.0.1:3000/health && npm run dev -w web -- --host 127.0.0.1 --port 5173 --strictPort\""
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "^1.55.0",
     "concurrently": "^9.1.2",
     "wait-on": "^8.0.1"
