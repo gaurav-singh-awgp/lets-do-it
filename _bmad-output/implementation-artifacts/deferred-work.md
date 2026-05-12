@@ -52,3 +52,7 @@
 
 - **Playwright config clarity: `fullyParallel: true` with `workers: 1`.** Current behavior is serial because `workers: 1` wins, but the combination is easy to misread and could invite future DB cross-talk if workers are raised without a per-worker database isolation strategy. Revisit when E2E sharding or per-worker DB isolation is designed.
 - **Axe gate uses global CI retries.** CI retries can hide flaky axe/timing failures if the first run fails and a retry passes. Current project policy favors E2E stability with retries; consider `retries: 0` for `a11y-list-shell.spec.ts` or retry-rate reporting if axe gate flakiness appears.
+
+## Deferred from: code review of 4-1-api-dockerfile-multistage-nonroot-health.md (2026-05-14)
+
+- **`npm audit` / advisory noise during `npm ci` in Docker layers** — Lockfile-driven moderate/high advisories appear in image build logs; addressing them is supply-chain hygiene (audit fix / bumps), not a regression from the Dockerfile layout itself.

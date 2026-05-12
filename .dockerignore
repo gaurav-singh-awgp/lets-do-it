@@ -1,0 +1,13 @@
+# Build context is repository root (see api/Dockerfile).
+.git
+.github
+node_modules
+api/node_modules
+web/node_modules
+web/dist
+_bmad-output
+.cursor
+**/__screenshots__
+**/test-results
+**/playwright-report
+**/.env

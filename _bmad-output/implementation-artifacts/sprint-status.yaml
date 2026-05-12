@@ -35,7 +35,12 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-03T00:00:00Z"
-last_updated: "2026-05-12T19:03:00Z"
+last_updated: "2026-05-14T12:00:00Z"
+# Story 4.1 code review patches applied; status done (2026-05-14)
+# Story 4.1 implementation complete (bmad-dev-story) on 2026-05-14 — status review
+# Story 4.1 contexted by bmad-create-story on 2026-05-13 — status ready-for-dev
+# Epic 4 in progress (first story 4.1) on 2026-05-13
+# Sprint Change Proposal approved (batch) 2026-05-13 — Epic 4 added to planning + sprint tracking
 # Epic 3 retrospective completed (epic-3-retro-2026-05-13.md) on 2026-05-13
 # Epic 2 retrospective completed (epic-2-retro-2026-05-12.md) on 2026-05-12
 # Story 3.1 code review complete (bmad-code-review) on 2026-05-12 — status done
@@ -78,16 +83,27 @@ development_status:
   1-6-baseline-accessibility-checks-for-list-shell: done
   epic-1-retrospective: done
 
-  epic-2: in-progress
+  epic-2: done
   2-1-post-api-v1-todos-with-validation-and-immutable-text-rule: done
   2-2-addcomposer-wired-to-create-mutation: done
   2-3-delete-api-v1-todos-by-id: done
   2-4-todorow-delete-control-with-accessible-labeling: done
   epic-2-retrospective: done
 
-  epic-3: in-progress
+  epic-3: done
   3-1-patch-api-v1-todos-by-id-for-done-only-updates: done
   3-2-accessible-done-toggle-with-completed-styling: done
   3-3-end-to-end-smoke-for-sc-01-core-loop: done
   3-4-ci-matrix-unit-e2e-and-axe-gate-on-list-view: done
   epic-3-retrospective: done
+
+  epic-4: in-progress
+  4-1-api-dockerfile-multistage-nonroot-health: done
+  4-2-web-dockerfile-static-serve-and-env: backlog
+  4-3-docker-compose-full-stack-and-profiles: backlog
+  4-4-readme-container-path-parity-nfr-06: backlog
+  4-5-vitest-coverage-scripts-and-ci-threshold: backlog
+  4-6-qa-evidence-pack-docs-qa: backlog
+  4-7-bmad-implementation-narrative-doc: backlog
+  4-8-ai-integration-and-mcp-usage-log: backlog
+  epic-4-retrospective: optional

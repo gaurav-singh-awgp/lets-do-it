@@ -535,6 +535,32 @@ If you **omit** a root workspace, README **Test** must still document the three 
 4. Wire **`package.json` scripts** above; verify **`npm test`** paths locally.  
 5. Extend CI to run the same commands.
 
+## Deployment & containerization (Epic 4)
+
+**Baseline (Epics 1–3):** Root **`docker-compose.yml`** provides **Postgres** only; **`api`** and **`web`** run on the **host** via Node (documented in README **Run**). This matches fast inner-loop development.
+
+**Target (NFR-08 / Epic 4):** Add **`api/Dockerfile`** and **`web/Dockerfile`** (multi-stage builds, **non-root** runtime user where the base image supports it, minimal attack surface). Extend Compose with **`api`** and **`web`** services:
+
+- **Networking:** Browser talks to **`web`** published port; SPA calls **`api`** using **`VITE_API_BASE_URL`** (or equivalent) pointing at the **host-mapped API port** or reverse-proxy path—document the chosen pattern so CORS (`WEB_ORIGIN`) and client env stay consistent.
+- **Secrets:** **`DATABASE_URL`**, **`WEB_ORIGIN`**, and any API secrets are **runtime env** or **Compose `env_file`**, never baked into image layers.
+- **Health:** Reuse **`GET /health`** on **api**; **web** image healthcheck performs HTTP **GET /** expecting **200**.
+- **Profiles (optional):** e.g. **`postgres`**-only profile for developers who keep current workflow; **`full`** profile builds/runs all three services.
+
+### `api` image (Story 4.1 — shipped)
+
+| Topic | Decision |
+|-------|-----------|
+| **Build** | From repo root: `docker build -f api/Dockerfile -t lets-do-it-api:local .` |
+| **Stages** | **builder:** `node:22-bookworm-slim`, `npm ci -w api`, `npm run build -w api`. **runner:** same base (slim), `wget` + `ca-certificates` for `HEALTHCHECK`, `npm ci -w api --omit=dev`, copy only `api/dist` from builder. |
+| **WORKDIR / process** | **`WORKDIR /app/api`**; **`CMD ["node", "dist/server.js"]`** (matches `api/package.json` **`start`**). |
+| **User** | **`USER node`** (UID **1000**, official image default). |
+| **Port** | **`EXPOSE 3000`**; override with **`PORT`** at runtime. **`HOST`** defaults to **`0.0.0.0`** in `server.ts` if unset. |
+| **Runtime env** | **`DATABASE_URL`** (required — migrations run at boot). **`WEB_ORIGIN`** (CORS allowlist; set to your SPA origin). Do not bake secrets into image layers. |
+| **Health** | Dockerfile **`HEALTHCHECK`** runs **`/bin/sh -c`** with **`wget`** against **`http://127.0.0.1:${PORT:-3000}/health`** (shell default **3000** when **`PORT`** unset; `$$` in the Dockerfile becomes `$` in the embedded script). **`--start-period=60s`** allows cold migrations. |
+| **Verification** | With **`docker compose`** unavailable on some hosts, use a **user-defined bridge network**: Postgres container + API container on the same network; **`DATABASE_URL`** host = Postgres **service name** (e.g. `postgres://todo:todo@<pg-container-name>:5432/todos`). On Docker Desktop, **`host.docker.internal`** also works against a Postgres bound to the host. Linux: **`--add-host=host.docker.internal:host-gateway`** when reaching host-published ports. |
+
+**TLS:** Termination at ingress/reverse proxy is acceptable; document that **NFR-04** applies to any internet-facing deployment.
+
 ## Architecture Validation Results
 
 ### Coherence Validation
@@ -555,7 +581,7 @@ Directories map to route → service → repository flow, FR/NFR ownership, and 
 
 **Epic/feature coverage**
 
-No epics file yet; coverage is via **PRD FR/NFR** and **UX spec**—both traced in **Requirements to Structure Mapping**.
+Epics and stories live in **`_bmad-output/planning-artifacts/epics.md`** (Epics 1–4). Epic 4 covers **container images**, **full-stack Compose**, **coverage reporting**, and **assessor documentation** (NFR-08–NFR-11).
 
 **Functional requirements**
 
@@ -563,7 +589,7 @@ FR-01–FR-10 are supported by API + UI paths and patterns (validation, PATCH se
 
 **Non-functional requirements**
 
-NFR-01–NFR-05 addressed by stack choice, logging, HTTPS/secrets discipline, and test/observability hooks. NFR-06 via README + OpenAPI path + CI. NFR-07 via Testing Library + axe/Playwright strategy in **web** + CI.
+NFR-01–NFR-05 addressed by stack choice, logging, HTTPS/secrets discipline, and test/observability hooks. NFR-06 via README + OpenAPI path + CI. NFR-07 via Testing Library + axe/Playwright strategy in **web** + CI. **NFR-08–NFR-11** via Epic 4 deliverables (Docker/Compose, coverage scripts and optional gate, `docs/qa/*`, BMAD/AI narrative).
 
 ### Implementation Readiness Validation
 
@@ -584,7 +610,7 @@ Naming, formats, errors, loading, Query invalidation, and anti-patterns are spec
 | Priority | Finding |
 |----------|---------|
 | **Critical** | None identified. |
-| **Important** | **Epics/stories** (`bmad-create-epics-and-stories`) not run—implementation can still proceed from PRD + this doc; CE adds sprint-sized traceability. |
+| **Important** | **Epic 4** (containerization + coverage + assessor docs) is planned in epics—implement via **`bmad-create-story`** starting at **4.1**. |
 | **Nice-to-have** | Optional **`packages/shared`** or OpenAPI-generated client; deeper **Playwright** coverage beyond smoke (infra is **required** at setup per **QA integration — Project Setup**). |
 
 ### Validation Issues Addressed
