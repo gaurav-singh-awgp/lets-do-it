@@ -88,4 +88,18 @@ test.describe("ES-1.6.a — axe on list shell (GET states)", () => {
     const results = await new AxeBuilder({ page }).analyze();
     assertNoCriticalViolations(results, "error banner state");
   });
+
+  test("composer client validation: zero critical violations", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("todo-empty")).toBeVisible();
+    await page.getByPlaceholder(/what needs doing/i).press("Enter");
+    await expect(
+      page.getByText(/Enter a short description/i),
+    ).toBeVisible();
+
+    const results = await new AxeBuilder({ page }).analyze();
+    assertNoCriticalViolations(results, "composer validation");
+  });
 });

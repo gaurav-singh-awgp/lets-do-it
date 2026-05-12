@@ -4,9 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 import { AddTodoForm } from "./AddTodoForm";
 
 describe("AddTodoForm", () => {
-  it("disables submit when text is empty", () => {
+  it("allows submit while text is empty (client validation blocks POST)", () => {
     render(<AddTodoForm submitting={false} onCreate={vi.fn()} />);
-    expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /add/i })).toBeEnabled();
   });
 
   it("submits trimmed text", async () => {

@@ -129,19 +129,22 @@ describe("TodoApp keyboard — IS-1.6.a focus order in populated state", () => {
     const input = document.getElementById("todo-new");
     expect(document.activeElement).toBe(input);
 
-    // 2. The Add button is disabled when text is empty, so it is excluded from
-    //    tab order. Next Tab goes directly to the first row's toggle checkbox.
+    // 2. Next Tab: Add button (submit is enabled while empty; client validation blocks POST)
+    await user.tab();
+    expect(document.activeElement).toHaveTextContent(/^add$/i);
+
+    // 3. Next Tab: first row's toggle checkbox
     await user.tab();
     expect(document.activeElement).toHaveAttribute("type", "checkbox");
 
-    // 3. Next Tab: first row's delete button
+    // 4. Next Tab: first row's delete button
     await user.tab();
     expect(document.activeElement).toHaveAttribute(
       "aria-label",
       expect.stringMatching(/^delete /i),
     );
 
-    // 4. Next Tab: second row's toggle checkbox — confirms no focus trap between rows
+    // 5. Next Tab: second row's toggle checkbox — confirms no focus trap between rows
     await user.tab();
     expect(document.activeElement).toHaveAttribute("type", "checkbox");
   });

@@ -1,10 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { delay, http, HttpResponse } from "msw";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Todo } from "../../api/todosClient";
 import { server } from "../../test/mswServer";
+import { todoKeys } from "./todoKeys";
 import { TodoApp } from "./TodoApp";
 
 function renderWithClient() {
@@ -209,6 +210,155 @@ describe("TodoApp", () => {
       await waitFor(() =>
         expect(screen.getByText("Recovered")).toBeVisible(),
       );
+    });
+
+    it("US-2.2.a empty or whitespace submit shows validation and does not POST", async () => {
+      const user = userEvent.setup();
+      let postCount = 0;
+      server.use(
+        http.get("*/api/v1/todos", () => HttpResponse.json([])),
+        http.post("*/api/v1/todos", () => {
+          postCount++;
+          return HttpResponse.json(
+            { error: { message: "unexpected", code: "INTERNAL" } },
+            { status: 500 },
+          );
+        }),
+      );
+      renderWithClient();
+      await waitFor(() =>
+        expect(screen.getByTestId("todo-empty")).toBeVisible(),
+      );
+      const input = screen.getByRole("textbox", { name: /new todo/i });
+      await user.click(input);
+      const form = input.closest("form");
+      expect(form).toBeTruthy();
+      fireEvent.submit(form!);
+      expect(
+        await screen.findByText(/Enter a short description/i),
+      ).toBeVisible();
+      expect(postCount).toBe(0);
+
+      await user.type(input, "   ");
+      fireEvent.submit(form!);
+      expect(postCount).toBe(0);
+    });
+
+    it("US-2.2.a rejects over 500 Unicode code points without POST", async () => {
+      const user = userEvent.setup();
+      let postCount = 0;
+      server.use(
+        http.get("*/api/v1/todos", () => HttpResponse.json([])),
+        http.post("*/api/v1/todos", () => {
+          postCount++;
+          return HttpResponse.json({}, { status: 201 });
+        }),
+      );
+      renderWithClient();
+      await waitFor(() =>
+        expect(screen.getByTestId("todo-empty")).toBeVisible(),
+      );
+      const input = screen.getByRole("textbox", { name: /new todo/i });
+      await user.click(input);
+      const tooLongUnicode = "🙂".repeat(501);
+      expect([...tooLongUnicode]).toHaveLength(501);
+      expect(tooLongUnicode.length).toBeGreaterThan(501);
+      await user.paste(tooLongUnicode);
+      await user.click(screen.getByRole("button", { name: /^add$/i }));
+      expect(
+        await screen.findByText(/Keep todo text at or below 500/i),
+      ).toBeVisible();
+      expect(postCount).toBe(0);
+    });
+
+    it("US-2.2.b POST 201 clears composer and invalidates list query", async () => {
+      const user = userEvent.setup();
+      const client = new QueryClient({
+        defaultOptions: {
+          queries: { retry: false },
+          mutations: { retry: false },
+        },
+      });
+      const invalidateSpy = vi.spyOn(client, "invalidateQueries");
+      render(
+        <QueryClientProvider client={client}>
+          <TodoApp />
+        </QueryClientProvider>,
+      );
+      let list: Todo[] = [];
+      server.use(
+        http.get("*/api/v1/todos", () => HttpResponse.json(list)),
+        http.post("*/api/v1/todos", async ({ request }) => {
+          const body = (await request.json()) as { text?: string };
+          const created: Todo = {
+            id: "00000000-0000-4000-8000-000000000099",
+            text: String(body.text ?? ""),
+            done: false,
+            createdAt: new Date().toISOString(),
+          };
+          list = [created];
+          return HttpResponse.json(created, { status: 201 });
+        }),
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("todo-empty")).toBeVisible(),
+      );
+      await user.type(screen.getByRole("textbox", { name: /new todo/i }), "Hello");
+      await user.click(screen.getByRole("button", { name: /^add$/i }));
+      await waitFor(() =>
+        expect(invalidateSpy).toHaveBeenCalledWith({
+          queryKey: todoKeys.list(),
+        }),
+      );
+      await waitFor(() =>
+        expect(screen.getByRole("textbox", { name: /new todo/i })).toHaveValue(""),
+      );
+      await waitFor(() => expect(screen.getByText("Hello")).toBeVisible());
+    });
+
+    it("IS-2.2.a POST failure shows Retry on create error and succeeds on retry", async () => {
+      const user = userEvent.setup();
+      let postAttempts = 0;
+      let list: Todo[] = [];
+      server.use(
+        http.get("*/api/v1/todos", () => HttpResponse.json(list)),
+        http.post("*/api/v1/todos", async ({ request }) => {
+          postAttempts++;
+          if (postAttempts === 1) {
+            return HttpResponse.json(
+              {
+                error: {
+                  message: "Save failed",
+                  code: "INTERNAL",
+                },
+              },
+              { status: 500 },
+            );
+          }
+          const body = (await request.json()) as { text?: string };
+          const created: Todo = {
+            id: "00000000-0000-4000-8000-000000000088",
+            text: String(body.text ?? ""),
+            done: false,
+            createdAt: new Date().toISOString(),
+          };
+          list = [created];
+          return HttpResponse.json(created, { status: 201 });
+        }),
+      );
+      renderWithClient();
+      await waitFor(() =>
+        expect(screen.getByTestId("todo-empty")).toBeVisible(),
+      );
+      await user.type(screen.getByRole("textbox", { name: /new todo/i }), "Fix");
+      await user.click(screen.getByRole("button", { name: /^add$/i }));
+      const alert = await screen.findByRole("alert");
+      expect(alert).toHaveTextContent("Save failed");
+      await user.click(
+        within(alert).getByRole("button", { name: /^retry$/i }),
+      );
+      await waitFor(() => expect(screen.getByText("Fix")).toBeVisible());
+      expect(postAttempts).toBe(2);
     });
   });
 });

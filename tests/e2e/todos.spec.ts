@@ -26,6 +26,8 @@ test.describe("todo journeys", () => {
     await page.getByRole("button", { name: /^add$/i }).click();
     await expect(page.getByText("Buy oat milk")).toBeVisible();
     await expect(page.getByTestId("todo-empty")).toHaveCount(0);
+    const first = page.getByRole("list", { name: /todo list/i }).locator("li").first();
+    await expect(first).toContainText("Buy oat milk");
   });
 
   test("complete todo", async ({ page }) => {
@@ -70,8 +72,9 @@ test.describe("todo journeys", () => {
     await page.goto("/");
     await page.getByPlaceholder(/what needs doing/i).fill("Bad");
     await page.getByRole("button", { name: /^add$/i }).click();
-    await expect(page.getByRole("alert")).toContainText(
-      "Server could not save this todo",
-    );
+    const createAlert = page.getByRole("alert").filter({
+      hasText: "Server could not save this todo",
+    });
+    await expect(createAlert).toBeVisible();
   });
 });

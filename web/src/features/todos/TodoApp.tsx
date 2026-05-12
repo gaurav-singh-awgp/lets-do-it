@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRef } from "react";
 import {
   ApiEnvelopeError,
   createTodo,
@@ -11,8 +12,15 @@ import { AddTodoForm } from "./AddTodoForm";
 import { todoKeys } from "./todoKeys";
 import { TodoList } from "./TodoList";
 
-function mutationErrorMessage(...errs: Array<Error | null | undefined>) {
-  for (const e of errs) {
+function patchDelErrorMessage(
+  patchErr: Error | null | undefined,
+  delErr: Error | null | undefined,
+): string | undefined {
+  for (const e of [patchErr, delErr]) {
+    if (e instanceof ApiEnvelopeError) {
+      const m = e.message.trim();
+      if (m.length > 0) return m;
+    }
     if (e?.message) return e.message;
   }
   return undefined;
@@ -21,10 +29,6 @@ function mutationErrorMessage(...errs: Array<Error | null | undefined>) {
 const GENERIC_LOAD_FAILURE = "We couldn't load your todos.";
 
 function loadErrorDisplayMessage(error: Error | null | undefined): string {
-  // AC4(b): show API-authored message verbatim, otherwise friendly fallback.
-  // Plain `Error.message` may carry synthesized statusText / "Request failed"
-  // from buildResponseError or a network-layer TypeError — none of those are
-  // user-facing copy, so we substitute the generic line.
   if (error instanceof ApiEnvelopeError) {
     const m = error.message.trim();
     if (m.length > 0) return m;
@@ -32,8 +36,19 @@ function loadErrorDisplayMessage(error: Error | null | undefined): string {
   return GENERIC_LOAD_FAILURE;
 }
 
+const GENERIC_CREATE_FAILURE = "We couldn't add that todo.";
+
+function createErrorDisplayMessage(error: Error | null | undefined): string {
+  if (error instanceof ApiEnvelopeError) {
+    const m = error.message.trim();
+    if (m.length > 0) return m;
+  }
+  return GENERIC_CREATE_FAILURE;
+}
+
 export function TodoApp() {
   const qc = useQueryClient();
+  const retryLockRef = useRef(false);
   const q = useQuery({ queryKey: todoKeys.list(), queryFn: listTodos });
   const create = useMutation({
     mutationFn: (text: string) => createTodo(text),
@@ -55,13 +70,16 @@ export function TodoApp() {
     },
   });
 
-  const mutationBanner = mutationErrorMessage(
-    create.error,
-    patch.error,
-    del.error,
-  );
+  const createError =
+    create.isError && create.error
+      ? createErrorDisplayMessage(create.error)
+      : null;
+
+  const patchDelBanner = patchDelErrorMessage(patch.error, del.error);
 
   const listLoading = q.isPending || (q.isError && q.isFetching);
+
+  const lastCreateText = create.variables;
 
   return (
     <div className="todo-app">
@@ -73,17 +91,46 @@ export function TodoApp() {
           }}
         />
       ) : null}
-      {mutationBanner ? (
-        <div className="todo-error" role="alert">
-          {mutationBanner}
+      {createError ? (
+        <div className="todo-error todo-error-row" role="alert">
+          <span>{createError}</span>
+          <button
+            type="button"
+            className="todo-retry-button"
+            disabled={create.isPending || lastCreateText === undefined}
+            onClick={() => {
+              if (
+                retryLockRef.current ||
+                create.isPending ||
+                lastCreateText === undefined
+              ) {
+                return;
+              }
+              retryLockRef.current = true;
+              void create
+                .mutateAsync(lastCreateText)
+                .finally(() => {
+                  retryLockRef.current = false;
+                });
+            }}
+          >
+            Retry
+          </button>
         </div>
       ) : null}
-      <AddTodoForm
-        submitting={create.isPending}
-        onCreate={async (text) => {
-          await create.mutateAsync(text);
-        }}
-      />
+      {patchDelBanner ? (
+        <div className="todo-error" role="alert">
+          {patchDelBanner}
+        </div>
+      ) : null}
+      <div className="todo-composer-sticky">
+        <AddTodoForm
+          submitting={create.isPending}
+          onCreate={async (text) => {
+            await create.mutateAsync(text);
+          }}
+        />
+      </div>
       <TodoList
         loading={listLoading}
         todos={q.data ?? []}
