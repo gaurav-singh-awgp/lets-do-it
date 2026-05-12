@@ -10,7 +10,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate-cli.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:coverage:ci": "CI_COVERAGE_GATE=1 vitest run --coverage"
   },
   "dependencies": {
     "@fastify/cors": "^11.0.1",
@@ -26,6 +28,7 @@
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/pg": "^8.11.10",
+    "@vitest/coverage-v8": "^3.2.4",
     "drizzle-kit": "^0.30.1",
     "tsx": "^4.19.2",
     "typescript": "~5.7.2",

@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run --config vitest.config.ts",
-    "test:watch": "vitest --config vitest.config.ts"
+    "test:watch": "vitest --config vitest.config.ts",
+    "test:coverage": "vitest run --config vitest.config.ts --coverage",
+    "test:coverage:ci": "CI_COVERAGE_GATE=1 vitest run --config vitest.config.ts --coverage"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -28,6 +30,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",

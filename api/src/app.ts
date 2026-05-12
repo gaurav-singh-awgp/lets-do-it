@@ -29,6 +29,7 @@ export async function buildApp(opts: BuildAppOptions = {}) {
     ajv: {
       customOptions: {
         removeAdditional: false,
+        coerceTypes: false,
       },
     },
   });

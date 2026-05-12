@@ -66,6 +66,15 @@ npm run test:web    # Web — jsdom + Testing Library
 npm run test        # All workspace test scripts
 ```
 
+**Coverage (Vitest v8 — Epic 4 / NFR-09)**
+
+```bash
+npm run test:coverage              # HTML + lcov under api/coverage/ and web/coverage/ (gitignored)
+npm run test:coverage:ci           # Same with ≥70% lines/statements/functions and ≥60% branches (set CI_COVERAGE_GATE)
+```
+
+For **`api`** integration coverage, set **`DATABASE_URL`** (e.g. match root Compose: `postgres://todo:todo@127.0.0.1:5432/todos`). CI runs **`test:coverage:ci`** after unit tests with **`DATABASE_URL`** from the workflow env.
+
 **End-to-end (Playwright)**
 
 ```bash
@@ -95,7 +104,7 @@ npm run check:readme   # fails if ## Run / ## Test / ## API contract are missing
 
 **Continuous integration**
 
-On **push** and **pull_request** to **`main`**, GitHub Actions (`.github/workflows/ci.yml`) runs **`npm ci`**, then **`npm run check:readme`**, **`npm run lint`**, **`npm run test:api`**, **`npm run test:web`**, installs **Playwright Chromium**, and **`npm run test:e2e`** against a **Postgres 17** service with the same **`todo` / `todo` / `todos`** credentials as local Compose. The E2E step includes **`a11y-list-shell.spec.ts`** (NFR-07 axe gate: zero critical violations on empty state, populated list, error banner, composer validation, and full **add → complete → delete** flow, `ES-3.4.a`).
+On **push** and **pull_request** to **`main`**, GitHub Actions (`.github/workflows/ci.yml`) runs **`npm ci`**, then **`npm run check:readme`**, **`npm run lint`**, **`npm run test:api`**, **`npm run test:web`**, **`npm run test:coverage:ci`** (Vitest coverage gate with **`DATABASE_URL`**), installs **Playwright Chromium**, and **`npm run test:e2e`** against a **Postgres 17** service with the same **`todo` / `todo` / `todos`** credentials as local Compose. The E2E step includes **`a11y-list-shell.spec.ts`** (NFR-07 axe gate: zero critical violations on empty state, populated list, error banner, composer validation, and full **add → complete → delete** flow, `ES-3.4.a`).
 
 NFR-01 / NFR-02 performance measurements are not hard-gated in this CI workflow. Track them as a future vendor-neutral perf smoke (`ES-3.4.b` / backlog hook) using server timing logs or client marks before introducing a hard threshold.
 
