@@ -187,17 +187,21 @@ export async function registerTodoRoutes(
       schema: {
         tags: ["todos"],
         summary: "Delete todo",
+        description:
+          "Hard-deletes a todo by id. Returns 204 with no body on success. " +
+          "Returns 404 when the id does not exist; repeat delete on an already-deleted id also returns 404 (treat as idempotent from a UX perspective).",
         params: { ...todoIdParamOpenApi },
         response: {
           204: {
             description: "No content — todo deleted",
           },
           400: {
-            description: "Invalid id",
+            description: "Invalid id — not a UUID",
             ...errorEnvelopeJsonSchema,
           },
           404: {
-            description: "Todo not found",
+            description:
+              "Todo not found. Also returned on repeat delete of an already-deleted id.",
             ...errorEnvelopeJsonSchema,
           },
           500: {

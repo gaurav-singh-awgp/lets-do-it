@@ -101,4 +101,6 @@ Todo REST resources live under **`/api/v1/todos`**. **`GET /api/v1/todos`** retu
 
 **`POST /api/v1/todos`** accepts JSON **`{ "text": "…" }`**. On success it returns **201** with a single todo object in the same **camelCase** shape (`done` is always **`false`** on create). Empty / whitespace-only text, or text over **500 Unicode code points**, returns **400** with **`error.code`** **`VALIDATION`** (see OpenAPI for response shapes).
 
+**`DELETE /api/v1/todos/:id`** performs a **hard delete**. On success it returns **204** with **no response body**. Returns **400** with **`error.code`** **`VALIDATION`** for an invalid UUID, and **404** with **`error.code`** **`NOT_FOUND`** when the id does not exist or has already been deleted (repeat delete also returns **404** — integrators should treat both first and repeat delete as idempotent from a UX perspective). See the OpenAPI JSON for full response shapes.
+
 **`GET /health`** is a lightweight smoke check (not part of the versioned todo contract).

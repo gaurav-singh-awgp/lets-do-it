@@ -189,7 +189,7 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
     expect(res.statusCode).toBe(400);
   });
 
-  it("DELETE /api/v1/todos/:id removes todo", async () => {
+  it("IS-2.3.a: DELETE existing todo → 204 then GET shows row absent", async () => {
     const created = await app.inject({
       method: "POST",
       url: "/api/v1/todos",
@@ -208,12 +208,18 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
     expect(list.json()).toEqual([]);
   });
 
-  it("DELETE returns 404 for unknown id", async () => {
+  it("DELETE unknown id — 404 + envelope (regression for AC2)", async () => {
     const res = await app.inject({
       method: "DELETE",
       url: "/api/v1/todos/00000000-0000-4000-8000-000000000002",
     });
     expect(res.statusCode).toBe(404);
+    const body = res.json() as {
+      error: { code: string; message: string; requestId?: string };
+    };
+    expect(body.error.code).toBe("NOT_FOUND");
+    expect(body.error.message).toBeTruthy();
+    expect(body.error.requestId).toBeTruthy();
   });
 
   it("PATCH returns 400 for invalid uuid", async () => {
@@ -229,7 +235,7 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
     );
   });
 
-  it("DELETE returns 400 for invalid uuid", async () => {
+  it("DELETE invalid id — 400 + VALIDATION envelope (AC3)", async () => {
     const res = await app.inject({
       method: "DELETE",
       url: "/api/v1/todos/not-a-uuid",
@@ -260,7 +266,7 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
     expect(Object.keys(body[0]!)).toEqual(["id", "text", "done", "createdAt"]);
   });
 
-  it("OpenAPI JSON lists GET /api/v1/todos", async () => {
+  it("OpenAPI JSON lists GET /api/v1/todos and DELETE /api/v1/todos/{id} with correct responses", async () => {
     const swApp = await buildApp({
       databaseUrl: databaseUrl!,
       enableSwagger: true,
@@ -272,10 +278,29 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
       });
       expect(res.statusCode).toBe(200);
       const spec = res.json() as {
-        paths?: Record<string, { get?: unknown; post?: unknown }>;
+        paths?: Record<
+          string,
+          {
+            get?: unknown;
+            post?: unknown;
+            delete?: {
+              parameters?: Array<{ name: string; schema?: { format?: string } }>;
+              responses?: Record<string, unknown>;
+            };
+          }
+        >;
       };
       expect(spec.paths?.["/api/v1/todos"]?.get).toBeDefined();
       expect(spec.paths?.["/api/v1/todos"]?.post).toBeDefined();
+
+      const deletePath = spec.paths?.["/api/v1/todos/{id}"]?.delete;
+      expect(deletePath).toBeDefined();
+      expect(deletePath?.responses?.["204"]).toBeDefined();
+      expect(deletePath?.responses?.["400"]).toBeDefined();
+      expect(deletePath?.responses?.["404"]).toBeDefined();
+      expect(deletePath?.responses?.["500"]).toBeDefined();
+      const idParam = deletePath?.parameters?.find((p) => p.name === "id");
+      expect(idParam?.schema?.format).toBe("uuid");
     } finally {
       await swApp.close();
     }
