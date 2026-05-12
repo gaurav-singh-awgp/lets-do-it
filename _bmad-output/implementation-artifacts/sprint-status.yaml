@@ -1,9 +1,10 @@
 # generated: 2026-05-03T00:00:00Z
-# last_updated: 2026-05-03T12:00:00Z
+# last_updated: 2026-05-13T12:00:00Z
 # project: lets-do-it
 # project_key: NOKEY
 # tracking_system: file-system
 # story_location: _bmad-output/implementation-artifacts
+# Sprint planning re-run 2026-05-13 — reconciled _bmad-output/planning-artifacts/epics.md; preserved statuses (no downgrades).
 #
 # STATUS DEFINITIONS:
 # ==================
@@ -35,49 +36,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-03T00:00:00Z"
-last_updated: "2026-05-13T22:30:00Z"
-# Epic 4 retrospective completed (epic-4-retro-2026-05-13.md) on 2026-05-13
-# Story 4.8 implementation complete on 2026-05-13 — status done
-# Story 4.7 implementation complete on 2026-05-13 — status done
-# Story 4.6 implementation complete on 2026-05-13 — status done
-# Story 4.5 implementation complete on 2026-05-14 — status done
-# Story 4.4 implementation complete on 2026-05-14 — status done
-# Story 4.3 implementation complete on 2026-05-14 — status done
-# Story 4.2 code review complete (bmad-code-review) on 2026-05-14 — status done
-# Story 4.2 implementation complete (bmad-dev-story) on 2026-05-14 — status review
-# Story 4.2 contexted by bmad-create-story on 2026-05-14 — status ready-for-dev
-# Story 4.1 code review patches applied; status done (2026-05-14)
-# Story 4.1 implementation complete (bmad-dev-story) on 2026-05-14 — status review
-# Story 4.1 contexted by bmad-create-story on 2026-05-13 — status ready-for-dev
-# Epic 4 in progress (first story 4.1) on 2026-05-13
-# Sprint Change Proposal approved (batch) 2026-05-13 — Epic 4 added to planning + sprint tracking
-# Epic 3 retrospective completed (epic-3-retro-2026-05-13.md) on 2026-05-13
-# Epic 2 retrospective completed (epic-2-retro-2026-05-12.md) on 2026-05-12
-# Story 3.1 code review complete (bmad-code-review) on 2026-05-12 — status done
-# Story 3.1 ready for code review (bmad-dev-story) on 2026-05-12 — status review
-# Story 3.1 in progress (bmad-dev-story) on 2026-05-12
-# Story 3.1 contexted by bmad-create-story on 2026-05-12 — status ready-for-dev
-# Story 2.4 code review complete (bmad-code-review) on 2026-05-12 — status done
-# Story 2.4 implementation complete (bmad-dev-story) on 2026-05-12 — status review
-# Story 2.4 in progress (bmad-dev-story) on 2026-05-12
-# Story 2.4 contexted by bmad-create-story on 2026-05-12
-# Story 2.3 contexted by bmad-create-story on 2026-05-12
-# Epic 1 retrospective completed (epic-1-retro-2026-05-12.md) on 2026-05-12
-# Story 1.5 code review completed by bmad-code-review on 2026-05-12
-# Story 1.4 contexted by bmad-create-story on 2026-05-12
-# Story 1.4 code review completed by bmad-code-review on 2026-05-12
-# Story 2.2 marked done after code review fixes on 2026-05-12
-# Story 2.2 ready for code review (bmad-dev-story) on 2026-05-12
-# Story 2.2 in progress (bmad-dev-story) on 2026-05-12
-# Story 2.2 contexted by bmad-create-story on 2026-05-12
-# Story 2.1 code review completed by bmad-code-review on 2026-05-12
-# Story 2.1 implementation complete (bmad-dev-story) on 2026-05-12 — status review
-# Story 2.1 contexted by bmad-create-story on 2026-05-12
-# Story 1.6 code review completed by bmad-code-review on 2026-05-12
-# Story 1.6 implementation complete (bmad-dev-story) on 2026-05-12 — status review
-# Story 1.6 contexted by bmad-create-story on 2026-05-12
-# Story 1.5 contexted by bmad-create-story on 2026-05-12
-# Story 1.5 implementation complete (bmad-dev-story) on 2026-05-12 — status review
+last_updated: "2026-05-13T12:00:00Z"
 project: lets-do-it
 project_key: NOKEY
 tracking_system: file-system
