@@ -7,6 +7,10 @@ export default defineConfig({
   globalSetup: "./tests/e2e/global-setup.mjs",
   testDir: "tests/e2e",
   fullyParallel: true,
+  // All E2E specs share a single Postgres database; parallel workers cause
+  // cross-spec row interference. Serial execution (workers: 1) is required
+  // until a per-worker DB isolation strategy is designed (retro B2).
+  workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: [["list"]],

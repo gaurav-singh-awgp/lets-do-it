@@ -59,5 +59,7 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: End-to-end tests
+      # Runs all E2E specs including a11y-list-shell.spec.ts (NFR-07 axe gate:
+      # zero critical violations on add / complete / delete full flow, ES-3.4.a).
+      - name: End-to-end tests (incl. axe / NFR-07 gate)
         run: npm run test:e2e

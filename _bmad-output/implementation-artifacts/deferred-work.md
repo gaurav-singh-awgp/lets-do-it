@@ -47,3 +47,8 @@
 
 - Row `aria-busy` semantics omit delete-pending state in `TodoRow` (`aria-busy` currently reflects `busyToggle` only). Deferred as a pre-existing/out-of-scope a11y consistency gap for Story 3.2.
 - `TodoApp` uses a single `patch.variables?.id` pending tracker, which can misattribute busy state during overlapping toggle mutations. Deferred as a broader pre-existing concurrency-state concern.
+
+## Deferred from: code review of 3-4-ci-matrix-unit-e2e-and-axe-gate-on-list-view.md (2026-05-12)
+
+- **Playwright config clarity: `fullyParallel: true` with `workers: 1`.** Current behavior is serial because `workers: 1` wins, but the combination is easy to misread and could invite future DB cross-talk if workers are raised without a per-worker database isolation strategy. Revisit when E2E sharding or per-worker DB isolation is designed.
+- **Axe gate uses global CI retries.** CI retries can hide flaky axe/timing failures if the first run fails and a retry passes. Current project policy favors E2E stability with retries; consider `retries: 0` for `a11y-list-shell.spec.ts` or retry-rate reporting if axe gate flakiness appears.

@@ -102,4 +102,45 @@ test.describe("ES-1.6.a — axe on list shell (GET states)", () => {
     const results = await new AxeBuilder({ page }).analyze();
     assertNoCriticalViolations(results, "composer validation");
   });
+
+  /**
+   * ES-3.4.a — NFR-07 full-flow axe gate: add → complete → delete.
+   * Asserts zero critical violations at each DOM transition.
+   */
+  test("ES-3.4.a: add → complete → delete — zero critical violations at each step", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("todo-empty")).toBeVisible();
+
+    // Step 1: add todo — assert axe on populated list state
+    await page.getByPlaceholder(/what needs doing/i).fill("ES-3.4.a axe todo");
+    await page.getByRole("button", { name: /^add$/i }).click();
+    await expect(page.getByText("ES-3.4.a axe todo")).toBeVisible();
+    assertNoCriticalViolations(
+      await new AxeBuilder({ page }).analyze(),
+      "populated list after add",
+    );
+
+    // Step 2: toggle complete — assert axe on checked/done state
+    const row = page.locator("li").filter({ hasText: "ES-3.4.a axe todo" });
+    await row
+      .getByRole("checkbox", { name: /toggle done for es-3\.4\.a axe todo/i })
+      .click();
+    await expect(row.getByRole("checkbox")).toBeChecked();
+    await expect(row.locator(".todo-text.done")).toContainText("ES-3.4.a axe todo");
+    assertNoCriticalViolations(
+      await new AxeBuilder({ page }).analyze(),
+      "list with completed item",
+    );
+
+    // Step 3: delete — assert axe on empty state restored
+    await row.getByRole("button", { name: /delete es-3\.4\.a axe todo/i }).click();
+    await expect(page.getByText("ES-3.4.a axe todo")).toHaveCount(0);
+    await expect(page.getByTestId("todo-empty")).toBeVisible();
+    assertNoCriticalViolations(
+      await new AxeBuilder({ page }).analyze(),
+      "empty state after delete",
+    );
+  });
 });

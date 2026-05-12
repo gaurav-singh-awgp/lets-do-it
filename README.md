@@ -63,10 +63,10 @@ npm run test:e2e                  # see playwright.config.ts (webServer + global
 **E2E wiring (same as `playwright.config.ts`)**
 
 - **`webServer`** runs **`npm run dev:e2e`**, which starts the **API** and **Vite** together against Postgres.
-- **`tests/e2e/global-setup.mjs`** runs **`docker compose up -d`** when Docker is available (ignored if Compose errors, e.g. port **5432** already in use).
+- **`tests/e2e/global-setup.mjs`** runs **`docker compose up -d`** when Docker is available (ignored if Compose errors, e.g. port **5432** already in use). Skipped automatically when **`CI=true`** (Postgres is already provided by the Actions service container).
 - If **`DATABASE_URL`** is unset, Playwright defaults to **`postgres://todo:todo@127.0.0.1:5432/todos`** — aligned with `docker-compose.yml` and `api/.env.example`.
 
-If the web server health check times out on first run, ensure port **5173** is free or run with **`CI=1`** so Playwright always starts a fresh dev server.
+If the web server health check times out on first run, ensure port **5173** is free. You can run with **`CI=1`** so Playwright always starts a fresh dev server, but **`CI=1`** also skips the Compose startup in `global-setup.mjs`; start Postgres first with `docker compose up -d postgres` (or provide a reachable `DATABASE_URL`).
 
 **Lint**
 
@@ -82,7 +82,9 @@ npm run check:readme   # fails if ## Run / ## Test / ## API contract are missing
 
 **Continuous integration**
 
-On **push** and **pull_request** to **`main`**, GitHub Actions (`.github/workflows/ci.yml`) runs **`npm ci`**, then **`npm run check:readme`**, **`npm run lint`**, **`npm run test:api`**, **`npm run test:web`**, installs **Playwright Chromium**, and **`npm run test:e2e`** against a **Postgres 17** service with the same **`todo` / `todo` / `todos`** credentials as local Compose. **NFR-07** axe gates on full flows are **not** part of this workflow — they are tracked for later stories (e.g. **3.4** in the backlog).
+On **push** and **pull_request** to **`main`**, GitHub Actions (`.github/workflows/ci.yml`) runs **`npm ci`**, then **`npm run check:readme`**, **`npm run lint`**, **`npm run test:api`**, **`npm run test:web`**, installs **Playwright Chromium**, and **`npm run test:e2e`** against a **Postgres 17** service with the same **`todo` / `todo` / `todos`** credentials as local Compose. The E2E step includes **`a11y-list-shell.spec.ts`** (NFR-07 axe gate: zero critical violations on empty state, populated list, error banner, composer validation, and full **add → complete → delete** flow, `ES-3.4.a`).
+
+NFR-01 / NFR-02 performance measurements are not hard-gated in this CI workflow. Track them as a future vendor-neutral perf smoke (`ES-3.4.b` / backlog hook) using server timing logs or client marks before introducing a hard threshold.
 
 **All automated tests (unit + e2e)**
 
