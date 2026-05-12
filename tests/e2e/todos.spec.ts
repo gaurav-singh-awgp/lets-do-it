@@ -76,6 +76,45 @@ test.describe("todo journeys", () => {
     expect(patchCalls).toBeGreaterThan(0);
   });
 
+  test("ES-3.3.a: SC-01 core loop smoke (open -> add -> complete -> delete -> empty)", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.getByTestId("todo-empty")).toBeVisible();
+
+    await page.getByPlaceholder(/what needs doing/i).fill("SC-01 smoke todo");
+    await page.getByRole("button", { name: /^add$/i }).click();
+    await expect(page.getByText("SC-01 smoke todo")).toBeVisible();
+
+    const row = page.locator("li").filter({ hasText: "SC-01 smoke todo" });
+    await row.getByRole("checkbox", { name: /toggle done for sc-01 smoke todo/i }).click();
+    await expect(row.getByRole("checkbox")).toBeChecked();
+    await expect(row.locator(".todo-text.done")).toContainText("SC-01 smoke todo");
+
+    await row.getByRole("button", { name: /delete sc-01 smoke todo/i }).click();
+    await expect(page.getByText("SC-01 smoke todo")).toHaveCount(0);
+    await expect(page.getByTestId("todo-empty")).toBeVisible();
+  });
+
+  test("ES-3.3.b: reload after add preserves item before completion and delete", async ({ page }) => {
+    await page.goto("/");
+    await page.getByPlaceholder(/what needs doing/i).fill("SC-02 reload todo");
+    await page.getByRole("button", { name: /^add$/i }).click();
+    await expect(page.getByText("SC-02 reload todo")).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByText("SC-02 reload todo")).toBeVisible();
+
+    const row = page.locator("li").filter({ hasText: "SC-02 reload todo" });
+    await row
+      .getByRole("checkbox", { name: /toggle done for sc-02 reload todo/i })
+      .click();
+    await expect(row.getByRole("checkbox")).toBeChecked();
+    await row.getByRole("button", { name: /delete sc-02 reload todo/i }).click();
+    await expect(page.getByText("SC-02 reload todo")).toHaveCount(0);
+    await expect(page.getByTestId("todo-empty")).toBeVisible();
+  });
+
   test("error handling on create", async ({ page }) => {
     await page.route("**/api/v1/todos", async (route) => {
       const req = route.request();
