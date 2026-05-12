@@ -83,6 +83,63 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
     expect(body.error.code).toBe("VALIDATION");
   });
 
+  it("IS-2.1.a: POST persists text and done=false in DB", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/v1/todos",
+      headers: { "content-type": "application/json" },
+      payload: { text: "Persist me" },
+    });
+    expect(res.statusCode).toBe(201);
+    const { id } = res.json() as { id: string };
+    const row = await cleanPool.query<{ text: string; done: boolean }>(
+      "SELECT text, done FROM todos WHERE id = $1",
+      [id],
+    );
+    expect(row.rows).toHaveLength(1);
+    expect(row.rows[0]!.text).toBe("Persist me");
+    expect(row.rows[0]!.done).toBe(false);
+  });
+
+  it("IS-2.1.b: two sequential POSTs create two rows", async () => {
+    const first = await app.inject({
+      method: "POST",
+      url: "/api/v1/todos",
+      headers: { "content-type": "application/json" },
+      payload: { text: "First" },
+    });
+    const second = await app.inject({
+      method: "POST",
+      url: "/api/v1/todos",
+      headers: { "content-type": "application/json" },
+      payload: { text: "Second" },
+    });
+    expect(first.statusCode).toBe(201);
+    expect(second.statusCode).toBe(201);
+
+    const list = await app.inject({ method: "GET", url: "/api/v1/todos" });
+    expect(list.statusCode).toBe(200);
+    const body = list.json() as Array<{ text: string }>;
+    expect(body).toHaveLength(2);
+    expect(body.map((t) => t.text).sort()).toEqual(["First", "Second"]);
+  });
+
+  it("POST rejects 501 Unicode code points and does not insert a row", async () => {
+    const big = "x".repeat(501);
+    expect([...big].length).toBe(501);
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/v1/todos",
+      headers: { "content-type": "application/json" },
+      payload: { text: big },
+    });
+    expect(res.statusCode).toBe(400);
+    const cnt = await cleanPool.query<{ n: string }>(
+      "SELECT count(*)::text AS n FROM todos",
+    );
+    expect(Number(cnt.rows[0]!.n)).toBe(0);
+  });
+
   it("PATCH /api/v1/todos/:id toggles done", async () => {
     const created = await app.inject({
       method: "POST",
@@ -215,9 +272,10 @@ describe.skipIf(!databaseUrl)("todo API (integration)", () => {
       });
       expect(res.statusCode).toBe(200);
       const spec = res.json() as {
-        paths?: Record<string, { get?: unknown }>;
+        paths?: Record<string, { get?: unknown; post?: unknown }>;
       };
       expect(spec.paths?.["/api/v1/todos"]?.get).toBeDefined();
+      expect(spec.paths?.["/api/v1/todos"]?.post).toBeDefined();
     } finally {
       await swApp.close();
     }

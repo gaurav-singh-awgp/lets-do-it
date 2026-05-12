@@ -25,3 +25,13 @@
 ## Deferred from: code review of 1-2-local-postgresql-and-drizzle-schema-for-todos.md (2026-05-04)
 
 - Integration tests use a shared database and truncate `todos` per test; running Vitest with multiple workers against a single `DATABASE_URL` can cause cross-test interference. Address via `poolOptions.max: 1`, serial integration projects, or per-worker databases when CI enables parallelism.
+
+## Deferred from: code review of 2-1-post-api-v1-todos-with-validation-and-immutable-text-rule.md (2026-05-12)
+
+- Global `noindex` in `web/index.html` may be undesirable for production SEO, but this is pre-existing from Story 1.6 scope and not required to resolve Story 2.1.
+- Unit and E2E accessibility checks currently resolve different `axe-core` versions (`jest-axe` vs `@axe-core/playwright`), which can produce inconsistent violation outcomes across layers.
+- Current Story 2.1 working tree includes unrelated dependency/web/artifact churn outside the expected API-focused file scope; isolate in a later cleanup pass.
+
+## Deferred from: code review of 1-6-baseline-accessibility-checks-for-list-shell.md (2026-05-12)
+
+- Unit and E2E accessibility checks currently resolve different `axe-core` versions via `jest-axe` and `@axe-core/playwright`. This can produce inconsistent violation outcomes across layers. Defer as pre-existing tooling drift unless the team wants to pin/align both stacks now.

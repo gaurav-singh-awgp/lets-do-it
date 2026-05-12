@@ -99,4 +99,6 @@ With the API running (default **`http://localhost:3000`**):
 
 Todo REST resources live under **`/api/v1/todos`**. **`GET /api/v1/todos`** returns a **bare JSON array** (no `{ "data": ... }` wrapper): objects use **camelCase** keys `id`, `text`, `done`, `createdAt`, sorted by **`createdAt` descending** (newest first). Errors use **`{ "error": { "code", "message", "requestId"?, "details"? } }`**.
 
+**`POST /api/v1/todos`** accepts JSON **`{ "text": "…" }`**. On success it returns **201** with a single todo object in the same **camelCase** shape (`done` is always **`false`** on create). Empty / whitespace-only text, or text over **500 Unicode code points**, returns **400** with **`error.code`** **`VALIDATION`** (see OpenAPI for response shapes).
+
 **`GET /health`** is a lightweight smoke check (not part of the versioned todo contract).

@@ -35,10 +35,17 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-03T00:00:00Z"
-last_updated: "2026-05-13T00:30:00Z"
+last_updated: "2026-05-13T01:30:00Z"
+# Epic 1 retrospective completed (epic-1-retro-2026-05-12.md) on 2026-05-12
 # Story 1.5 code review completed by bmad-code-review on 2026-05-12
 # Story 1.4 contexted by bmad-create-story on 2026-05-12
 # Story 1.4 code review completed by bmad-code-review on 2026-05-12
+# Story 2.1 code review completed by bmad-code-review on 2026-05-12
+# Story 2.1 implementation complete (bmad-dev-story) on 2026-05-12 — status review
+# Story 2.1 contexted by bmad-create-story on 2026-05-12
+# Story 1.6 code review completed by bmad-code-review on 2026-05-12
+# Story 1.6 implementation complete (bmad-dev-story) on 2026-05-12 — status review
+# Story 1.6 contexted by bmad-create-story on 2026-05-12
 # Story 1.5 contexted by bmad-create-story on 2026-05-12
 # Story 1.5 implementation complete (bmad-dev-story) on 2026-05-12 — status review
 project: lets-do-it
@@ -47,17 +54,17 @@ tracking_system: file-system
 story_location: "_bmad-output/implementation-artifacts"
 
 development_status:
-  epic-1: in-progress
+  epic-1: done
   1-1-scaffold-api-and-web-from-approved-starters: done
   1-2-local-postgresql-and-drizzle-schema-for-todos: done
   1-3-get-api-v1-todos-with-openapi-and-error-envelope: done
   1-4-web-list-shell-with-loading-empty-and-fetch-error-states: done
   1-5-readme-run-test-api-contract-and-root-ci-skeleton: done
-  1-6-baseline-accessibility-checks-for-list-shell: backlog
-  epic-1-retrospective: optional
+  1-6-baseline-accessibility-checks-for-list-shell: done
+  epic-1-retrospective: done
 
-  epic-2: backlog
-  2-1-post-api-v1-todos-with-validation-and-immutable-text-rule: backlog
+  epic-2: in-progress
+  2-1-post-api-v1-todos-with-validation-and-immutable-text-rule: done
   2-2-addcomposer-wired-to-create-mutation: backlog
   2-3-delete-api-v1-todos-by-id: backlog
   2-4-todorow-delete-control-with-accessible-labeling: backlog
