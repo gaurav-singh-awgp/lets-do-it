@@ -35,7 +35,8 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: "2026-05-03T00:00:00Z"
-last_updated: "2026-05-14T20:00:00Z"
+last_updated: "2026-05-14T20:15:00Z"
+# Story 4.4 implementation complete on 2026-05-14 — status done
 # Story 4.3 implementation complete on 2026-05-14 — status done
 # Story 4.2 code review complete (bmad-code-review) on 2026-05-14 — status done
 # Story 4.2 implementation complete (bmad-dev-story) on 2026-05-14 — status review
@@ -105,7 +106,7 @@ development_status:
   4-1-api-dockerfile-multistage-nonroot-health: done
   4-2-web-dockerfile-static-serve-and-env: done
   4-3-docker-compose-full-stack-and-profiles: done
-  4-4-readme-container-path-parity-nfr-06: backlog
+  4-4-readme-container-path-parity-nfr-06: done
   4-5-vitest-coverage-scripts-and-ci-threshold: backlog
   4-6-qa-evidence-pack-docs-qa: backlog
   4-7-bmad-implementation-narrative-doc: backlog

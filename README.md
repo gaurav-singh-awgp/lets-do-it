@@ -15,6 +15,19 @@ docker compose up -d postgres
 
 Uses `docker-compose.yml` at the repo root (`postgres:17-alpine`, database `todos`, user/password `todo`).
 
+**Full stack in Docker (Epic 4 — profile `full`)**
+
+To run **Postgres + API + web** as containers (production-style images; no host Node for api/web):
+
+```bash
+docker compose --profile full up -d --build
+# If `docker compose` is unavailable, use standalone Compose v2+:
+# docker-compose --profile full up -d --build
+# or: COMPOSE_PROFILES=full docker-compose up -d --build
+```
+
+Then open **`http://127.0.0.1:9080/`** (static SPA). The API is published at **`http://127.0.0.1:3000/`** (health: **`/health`**). Compose sets **`WEB_ORIGIN`** to the web URL and builds the SPA with **`VITE_API_BASE_URL=http://127.0.0.1:3000`** so the browser can reach the API from the host. Do not run this at the same time as **`npm run dev:api`** on port **3000** (port conflict).
+
 **2. API env and schema**
 
 ```bash
