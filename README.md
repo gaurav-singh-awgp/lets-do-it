@@ -2,6 +2,12 @@
 
 Full-stack personal todo app (BMAD specs in `_bmad-output/planning-artifacts/`).
 
+## Documentation
+
+- **[Documentation index](docs/README.md)** — user guide, developer guide, and links to specs, QA evidence, BMad narrative, AI log, and implementation tracking.
+- **[Using the app](docs/USER_GUIDE.md)** — end-user flows: add, complete, delete, errors, limits, keyboard.
+- **[Developer guide](docs/DEVELOPER_GUIDE.md)** — repo layout, environment variables, tests, CI, where artifacts live.
+
 ## Run
 
 From the repository root (requires Node **20.19+** or **22.12+** per architecture):
@@ -49,7 +55,7 @@ npm run dev:web   # Vite client — default http://127.0.0.1:5173
 
 Run **api** and **web** in **separate terminals**.
 
-**CORS:** set **`WEB_ORIGIN`** in `api/.env` to the **single** origin the browser uses for the Vite app (default when unset: `http://127.0.0.1:5173`). The API does not accept a comma-separated list; use one URL only.
+**CORS:** set **`WEB_ORIGIN`** in `api/.env` to the **single** origin the browser uses for the Vite app (default when unset: `http://127.0.0.1:5173`). The API does not accept a comma-separated list; use one URL only. The value is matched with **string equality** to the browser `Origin` header—use the same scheme (`http` vs `https`), host, port, and **no trailing slash** (e.g. `http://127.0.0.1:5173`, not `http://127.0.0.1:5173/`).
 
 **Drizzle (from `api/`)**
 

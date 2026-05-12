@@ -36,6 +36,7 @@ This index summarizes assessor-facing quality evidence. Source commands live in 
 
 ## Related paths
 
+- **Documentation hub:** [`docs/README.md`](../README.md) — index of user guide, developer guide, and assessor docs (this file is linked from there).  
 - Planning: `_bmad-output/planning-artifacts/prd.md`, `epics.md`, `architecture.md`  
 - CI: `.github/workflows/ci.yml`  
 - Epic 4 narrative: `docs/bmad-implementation-narrative.md`  
